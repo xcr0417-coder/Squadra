@@ -3,542 +3,698 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>七龍珠：激震小隊 (4v4 手機平板支援版)</title>
+    <title>七龍珠：激震小隊 (完整技能與變身版)</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #111;
-            color: #fff;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none; /* 防止手機瀏覽器滑動與縮放 */
+            margin: 0; padding: 0; background-color: #111; color: #fff;
+            overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: none; user-select: none; -webkit-user-select: none;
         }
-        #game-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #222;
-        }
-        canvas {
-            background-color: #3e8e41; /* 草地背景 */
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-        #ui-layer {
-            position: absolute;
-            top: 10px;
-            left: 20px;
-            pointer-events: none;
-            text-shadow: 2px 2px 4px #000;
-            z-index: 10;
-        }
-        #game-over {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px 50px;
-            border: 3px solid #f1c40f;
-            border-radius: 15px;
-            text-align: center;
-            display: none;
-            z-index: 20;
-        }
-        #game-over h1 { margin-top: 0; }
-        button {
-            padding: 15px 30px;
-            font-size: 20px;
-            background-color: #e67e22;
-            color: white;
-            border: 2px solid #fff;
-            cursor: pointer;
-            border-radius: 10px;
-            font-weight: bold;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-        }
-        button:active { background-color: #d35400; transform: translateY(2px); }
+        #app { width: 100vw; height: 100vh; position: relative; }
         
-        /* 虛擬搖桿與按鈕 (手機平板專用) */
+        /* 角色選擇畫面 */
+        #select-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #e67e22 0%, #d35400 50%, #8e44ad 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        #select-screen h1 {
+            font-size: 40px; text-shadow: 2px 2px 5px #000; color: #f1c40f; margin-bottom: 20px;
+            text-align: center;
+        }
+        .char-container {
+            display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 800px;
+        }
+        .char-card {
+            background: rgba(0,0,0,0.6); border: 3px solid #fff; border-radius: 10px;
+            padding: 20px; width: 150px; text-align: center; cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .char-card:hover { transform: scale(1.05); border-color: #f1c40f; }
+        .char-card.selected { border-color: #f1c40f; box-shadow: 0 0 20px #f1c40f; background: rgba(241,196,15,0.2); }
+        .char-color-preview { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .start-btn {
+            margin-top: 30px; padding: 15px 40px; font-size: 24px; background: #e74c3c;
+            color: #fff; border: 2px solid #fff; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-weight: bold;
+        }
+        .start-btn:active { transform: translateY(3px); }
+
+        /* 遊戲畫面 */
+        #game-screen { display: none; width: 100%; height: 100%; background: #222; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        #ui-layer {
+            position: absolute; top: 10px; left: 10px; right: 10px; pointer-events: none;
+            display: flex; justify-content: space-between; text-shadow: 2px 2px 4px #000; z-index: 10;
+        }
+        .team-score { font-size: 20px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px; }
+        #blue-score-box { color: #3498db; border-left: 5px solid #3498db; }
+        #red-score-box { color: #e74c3c; border-right: 5px solid #e74c3c; text-align: right; }
+        
+        /* 手機控制面板 */
         #touch-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%;
-            pointer-events: none;
-            z-index: 5;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 20px;
-            box-sizing: border-box;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%;
+            pointer-events: none; z-index: 5; display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 20px; box-sizing: border-box;
         }
         #joystick-zone {
-            width: 150px;
-            height: 150px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            position: relative;
-            pointer-events: auto;
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            width: 160px; height: 160px; background: rgba(255,255,255,0.1); border-radius: 50%;
+            position: relative; pointer-events: auto; border: 2px solid rgba(255,255,255,0.3);
         }
         #joystick-knob {
-            width: 60px;
-            height: 60px;
-            background: rgba(241, 196, 15, 0.8);
-            border-radius: 50%;
-            position: absolute;
-            top: 45px;
-            left: 45px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease-out;
+            width: 60px; height: 60px; background: rgba(241,196,15,0.7); border-radius: 50%;
+            position: absolute; top: 50px; left: 50px; box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        #action-btn {
-            width: 100px;
-            height: 100px;
-            background: rgba(231, 76, 60, 0.8);
-            border-radius: 50%;
-            pointer-events: auto;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            font-weight: bold;
-            font-size: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-            margin-right: 20px;
+        #skill-buttons {
+            display: grid; grid-template-columns: 70px 70px; gap: 15px; pointer-events: auto;
         }
-        #action-btn:active { background: rgba(192, 57, 43, 1); transform: scale(0.95); }
+        .skill-btn {
+            width: 70px; height: 70px; background: rgba(52,152,219,0.7); border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5); color: white; font-weight: bold; font-size: 14px;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); padding: 5px; box-sizing: border-box;
+        }
+        .skill-btn:active { background: rgba(41,128,185,1); transform: scale(0.9); }
+        .skill-btn.cooldown { background: rgba(100,100,100,0.7); color: #ccc; }
+        .skill-4 { background: rgba(241,196,15,0.7); border-color: #f39c12; } /* 變身按鈕特殊顏色 */
+        .skill-4:active { background: rgba(243,156,18,1); }
+
+        /* 遊戲結束畫面 */
+        #game-over {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 20;
+        }
+        #game-over h1 { font-size: 50px; margin-bottom: 20px; }
+        #game-over button {
+            padding: 15px 40px; font-size: 24px; background: #2ecc71; color: white;
+            border: none; border-radius: 10px; cursor: pointer; font-weight: bold;
+        }
 
         @media (min-width: 1024px) {
-            #touch-controls {
-                opacity: 0.5; /* 電腦版半透明提示可用鍵盤 */
-            }
+            #touch-controls { opacity: 0.6; }
+            #pc-hint { display: block; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; pointer-events: none;}
         }
+        @media (max-width: 1023px) { #pc-hint { display: none; } }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <canvas id="gameCanvas" width="960" height="540"></canvas>
-    <div id="ui-layer">
-        <h2 style="margin:0; color:#3498db; font-size:24px;">藍隊 (我方) : <span id="blue-score">4</span></h2>
-        <h2 style="margin:5px 0 0 0; color:#e74c3c; font-size:24px;">紅隊 (敵方) : <span id="red-score">4</span></h2>
-    </div>
-    
-    <div id="touch-controls">
-        <div id="joystick-zone">
-            <div id="joystick-knob"></div>
+<div id="app">
+    <!-- 選擇畫面 -->
+    <div id="select-screen">
+        <h1>選擇你的戰士</h1>
+        <div class="char-container" id="char-list">
+            <!-- JS 動態生成 -->
         </div>
-        <div id="action-btn">氣功波</div>
+        <button class="start-btn" onclick="startGame()">開始戰鬥</button>
     </div>
 
-    <div id="game-over">
-        <h1 id="result-text">戰鬥結束</h1>
-        <button onclick="location.reload()">重新開戰</button>
+    <!-- 遊戲畫面 -->
+    <div id="game-screen">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div class="team-score" id="blue-score-box">
+                藍隊 (我方)<br><span id="blue-score" style="font-size:28px; font-weight:bold;">4</span> 存活
+            </div>
+            <div class="team-score" id="red-score-box">
+                紅隊 (敵方)<br><span id="red-score" style="font-size:28px; font-weight:bold;">4</span> 存活
+            </div>
+        </div>
+        
+        <div id="pc-hint">移動: WASD | 技能: J, K, L, I (或滑鼠點擊)</div>
+
+        <div id="touch-controls">
+            <div id="joystick-zone">
+                <div id="joystick-knob"></div>
+            </div>
+            <div id="skill-buttons">
+                <div class="skill-btn" id="btn-1" ontouchstart="useSkill(0, event)" onmousedown="useSkill(0, event)">技能1</div>
+                <div class="skill-btn" id="btn-2" ontouchstart="useSkill(1, event)" onmousedown="useSkill(1, event)">技能2</div>
+                <div class="skill-btn" id="btn-3" ontouchstart="useSkill(2, event)" onmousedown="useSkill(2, event)">技能3</div>
+                <div class="skill-btn skill-4" id="btn-4" ontouchstart="useSkill(3, event)" onmousedown="useSkill(3, event)">變身</div>
+            </div>
+        </div>
+
+        <div id="game-over">
+            <h1 id="result-text">戰鬥結束</h1>
+            <button onclick="location.reload()">返回選單</button>
+        </div>
     </div>
 </div>
 
 <script>
+    // ==========================================
+    // 遊戲設定與資料
+    // ==========================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const WORLD_WIDTH = 2500;
+    const WORLD_HEIGHT = 2500;
+    let camera = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
 
-    // UI 元素
-    const blueScoreEl = document.getElementById('blue-score');
-    const redScoreEl = document.getElementById('red-score');
-    const gameOverEl = document.getElementById('game-over');
-    const resultTextEl = document.getElementById('result-text');
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        camera.width = canvas.width;
+        camera.height = canvas.height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-    // 輸入控制狀態
+    // 角色資料庫
+    const CHARACTERS = {
+        'goku': {
+            name: '悟空', color: '#e67e22', secondaryColor: '#2980b9', aura: 'rgba(230,126,34,0.3)',
+            hp: 500, speed: 5, radius: 20,
+            skills: [
+                { name: '氣功波', cd: 15, type: 'shoot', dmg: 20, speed: 12, size: 8, color: '#00d2d3' },
+                { name: '龜派氣功', cd: 120, type: 'beam', dmg: 80, speed: 20, size: 25, color: '#3498db', duration: 30 },
+                { name: '瞬間移動', cd: 180, type: 'teleport', range: 300 },
+                { name: '超級賽亞人', cd: 600, type: 'transform', buff: { speed: 2, dmgMult: 1.5, aura: 'rgba(241,196,15,0.6)', color: '#f1c40f' }, duration: 900 }
+            ]
+        },
+        'vegeta': {
+            name: '達爾', color: '#2980b9', secondaryColor: '#ecf0f1', aura: 'rgba(41,128,185,0.3)',
+            hp: 450, speed: 5.5, radius: 19,
+            skills: [
+                { name: '連續能量', cd: 25, type: 'spread', count: 3, dmg: 15, speed: 10, size: 6, color: '#f1c40f' },
+                { name: '終極閃光', cd: 150, type: 'beam', dmg: 100, speed: 25, size: 30, color: '#f39c12', duration: 20 },
+                { name: '爆發波', cd: 200, type: 'aoe', dmg: 50, radius: 150, color: '#e74c3c' },
+                { name: '超級賽亞人', cd: 600, type: 'transform', buff: { speed: 1.5, dmgMult: 1.8, aura: 'rgba(241,196,15,0.6)', color: '#f1c40f' }, duration: 900 }
+            ]
+        },
+        'frieza': {
+            name: '弗利沙', color: '#ecf0f1', secondaryColor: '#8e44ad', aura: 'rgba(142,68,173,0.3)',
+            hp: 400, speed: 6, radius: 18,
+            skills: [
+                { name: '死亡光束', cd: 10, type: 'shoot', dmg: 15, speed: 18, size: 5, color: '#8e44ad' },
+                { name: '死亡球', cd: 200, type: 'shoot', dmg: 120, speed: 6, size: 45, color: '#9b59b6', pierce: true },
+                { name: '高速衝刺', cd: 120, type: 'dash', speedMult: 4, duration: 15 },
+                { name: '黃金型態', cd: 600, type: 'transform', buff: { hpHeal: 200, speed: 1.5, dmgMult: 1.5, aura: 'rgba(241,196,15,0.8)', color: '#d4af37' }, duration: 900 }
+            ]
+        },
+        'piccolo': {
+            name: '比克', color: '#27ae60', secondaryColor: '#8e44ad', aura: 'rgba(39,174,96,0.3)',
+            hp: 600, speed: 4.5, radius: 22,
+            skills: [
+                { name: '魔閃光', cd: 20, type: 'shoot', dmg: 25, speed: 10, size: 10, color: '#f1c40f' },
+                { name: '魔貫光殺砲', cd: 160, type: 'beam', dmg: 90, speed: 30, size: 15, color: '#f1c40f', pierce: true, duration: 15 },
+                { name: '自我再生', cd: 300, type: 'heal', amount: 150 },
+                { name: '巨大化', cd: 600, type: 'transform', buff: { radiusMult: 2, speed: 0.8, dmgMult: 2, defMult: 0.5, aura: 'rgba(39,174,96,0.6)' }, duration: 700 }
+            ]
+        }
+    };
+
+    let selectedCharId = 'goku';
+    
+    // 初始化選擇畫面
+    function initSelectScreen() {
+        const container = document.getElementById('char-list');
+        for (const [id, char] of Object.entries(CHARACTERS)) {
+            const card = document.createElement('div');
+            card.className = `char-card ${id === selectedCharId ? 'selected' : ''}`;
+            card.onclick = () => selectChar(id);
+            card.innerHTML = `
+                <div class="char-color-preview" style="background:${char.color}; border: 3px solid ${char.secondaryColor};"></div>
+                <h2 style="margin:5px 0;">${char.name}</h2>
+                <div style="font-size:12px; color:#bdc3c7;">
+                    ${char.skills.map(s => s.name).join('<br>')}
+                </div>
+            `;
+            container.appendChild(card);
+        }
+    }
+
+    function selectChar(id) {
+        selectedCharId = id;
+        document.querySelectorAll('.char-card').forEach((el, index) => {
+            if (Object.keys(CHARACTERS)[index] === id) el.classList.add('selected');
+            else el.classList.remove('selected');
+        });
+    }
+    initSelectScreen();
+
+    // ==========================================
+    // 遊戲引擎與實體
+    // ==========================================
+    let player = null;
+    let entities = [];
+    let projectiles = [];
+    let effects = [];
+    let isGameOver = false;
+
+    // 輸入控制
     const keys = { w: false, a: false, s: false, d: false };
-    const touchInput = { vx: 0, vy: 0, isAttacking: false }; // 搖桿向量 (-1 到 1)
+    const touchInput = { vx: 0, vy: 0 };
+    window.addEventListener('keydown', e => { 
+        if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; 
+        if(e.key === 'j') triggerSkill(0);
+        if(e.key === 'k') triggerSkill(1);
+        if(e.key === 'l') triggerSkill(2);
+        if(e.key === 'i') triggerSkill(3);
+    });
+    window.addEventListener('keyup', e => { 
+        if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; 
+    });
 
-    // 鍵盤事件 (保留電腦版支援)
-    window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; });
-    window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; });
-
-    // --- 虛擬搖桿邏輯 ---
+    // 虛擬搖桿
     const joystickZone = document.getElementById('joystick-zone');
     const joystickKnob = document.getElementById('joystick-knob');
-    let joystickCenter = { x: 0, y: 0 };
-    let joystickActive = false;
-    let joystickId = null;
+    let joyCenter = {x:0, y:0}, joyActive = false, joyId = null;
 
-    function initJoystick() {
+    joystickZone.addEventListener('touchstart', e => {
+        e.preventDefault();
         const rect = joystickZone.getBoundingClientRect();
-        joystickCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    }
-
-    joystickZone.addEventListener('touchstart', (e) => {
+        joyCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+        joyId = e.changedTouches[0].identifier;
+        joyActive = true;
+        updateJoy(e.changedTouches[0]);
+    }, {passive:false});
+    joystickZone.addEventListener('touchmove', e => {
         e.preventDefault();
-        initJoystick();
-        const touch = e.changedTouches[0];
-        joystickId = touch.identifier;
-        joystickActive = true;
-        updateJoystick(touch);
-    }, { passive: false });
-
-    joystickZone.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        if (!joystickActive) return;
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            if (e.changedTouches[i].identifier === joystickId) {
-                updateJoystick(e.changedTouches[i]);
-                break;
-            }
+        if(!joyActive) return;
+        for(let t of e.changedTouches) {
+            if(t.identifier === joyId) { updateJoy(t); break; }
         }
-    }, { passive: false });
+    }, {passive:false});
+    const resetJoy = (e) => { e.preventDefault(); joyActive=false; joyId=null; touchInput.vx=0; touchInput.vy=0; joystickKnob.style.transform='translate(0,0)'; };
+    joystickZone.addEventListener('touchend', resetJoy);
+    joystickZone.addEventListener('touchcancel', resetJoy);
 
-    const resetJoystick = (e) => {
-        e.preventDefault();
-        joystickActive = false;
-        joystickId = null;
-        touchInput.vx = 0;
-        touchInput.vy = 0;
-        joystickKnob.style.transform = `translate(0px, 0px)`;
-    };
-    joystickZone.addEventListener('touchend', resetJoystick);
-    joystickZone.addEventListener('touchcancel', resetJoystick);
-
-    function updateJoystick(touch) {
-        const dx = touch.clientX - joystickCenter.x;
-        const dy = touch.clientY - joystickCenter.y;
-        const distance = Math.hypot(dx, dy);
-        const maxRadius = 45; // 搖桿最大移動半徑
-
-        let clampedDistance = Math.min(distance, maxRadius);
+    function updateJoy(t) {
+        const dx = t.clientX - joyCenter.x, dy = t.clientY - joyCenter.y;
+        const dist = Math.min(Math.hypot(dx, dy), 50);
         const angle = Math.atan2(dy, dx);
-        
-        const knobX = Math.cos(angle) * clampedDistance;
-        const knobY = Math.sin(angle) * clampedDistance;
-        
-        joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
-        
-        // 轉換為正規化向量 (-1 到 1)
-        touchInput.vx = Math.cos(angle) * (clampedDistance / maxRadius);
-        touchInput.vy = Math.sin(angle) * (clampedDistance / maxRadius);
+        joystickKnob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
+        touchInput.vx = Math.cos(angle) * (dist/50);
+        touchInput.vy = Math.sin(angle) * (dist/50);
     }
 
-    // --- 攻擊按鈕邏輯 ---
-    const actionBtn = document.getElementById('action-btn');
-    actionBtn.addEventListener('touchstart', (e) => { e.preventDefault(); touchInput.isAttacking = true; });
-    actionBtn.addEventListener('touchend', (e) => { e.preventDefault(); touchInput.isAttacking = false; });
-    
-    // 滑鼠點擊攻擊 (保留電腦支援)
-    canvas.addEventListener('mousedown', () => touchInput.isAttacking = true);
-    canvas.addEventListener('mouseup', () => touchInput.isAttacking = false);
-    // 空白鍵攻擊
-    window.addEventListener('keydown', e => { if(e.code === 'Space') touchInput.isAttacking = true; });
-    window.addEventListener('keyup', e => { if(e.code === 'Space') touchInput.isAttacking = false; });
-
-    // 自動找尋最近敵人功能 (給手機操作使用)
-    function findNearestEnemy(player, entities) {
-        let target = null;
-        let minDist = Infinity;
-        entities.forEach(ent => {
-            if (ent !== player && ent.team !== player.team && ent.hp > 0) {
-                const dist = Math.hypot(ent.x - player.x, ent.y - player.y);
-                if (dist < minDist) {
-                    minDist = dist;
-                    target = ent;
-                }
-            }
-        });
-        return target;
+    // 技能按鈕觸發
+    function useSkill(index, e) {
+        if(e) e.preventDefault();
+        triggerSkill(index);
+    }
+    function triggerSkill(index) {
+        if(player && !isGameOver) player.castSkill(index);
     }
 
+    // 實體類別
     class Character {
-        constructor(x, y, team, isPlayer = false, role = 'damage') {
-            this.x = x;
-            this.y = y;
-            this.team = team;
-            this.isPlayer = isPlayer;
-            this.role = role;
+        constructor(x, y, team, charId, isPlayer = false) {
+            this.x = x; this.y = y; this.team = team; this.isPlayer = isPlayer;
+            this.charId = charId;
+            const baseData = CHARACTERS[charId];
+            this.name = baseData.name;
+            this.baseColor = baseData.color;
+            this.color = this.baseColor;
+            this.secondaryColor = baseData.secondaryColor;
+            this.baseAura = baseData.aura;
+            this.aura = this.baseAura;
             
-            // 根據角色設定數值
-            this.radius = role === 'tank' ? 22 : 16;
-            this.maxHp = role === 'tank' ? 400 : (role === 'damage' ? 200 : 150);
-            this.hp = this.maxHp;
-            this.speed = role === 'tank' ? 2 : (role === 'damage' ? 4.5 : 3.5);
+            this.maxHp = baseData.hp; this.hp = this.maxHp;
+            this.baseSpeed = baseData.speed; this.speed = this.baseSpeed;
+            this.baseRadius = baseData.radius; this.radius = this.baseRadius;
+            this.skills = JSON.parse(JSON.stringify(baseData.skills)); // Deep copy skills
+            this.cooldowns = [0, 0, 0, 0];
             
-            // 隊伍顏色區分
-            if (isPlayer) {
-                this.color = '#f1c40f'; // 玩家為超級賽亞人金黃色
-            } else {
-                this.color = team === 'blue' ? '#3498db' : '#e74c3c';
-            }
-            
-            this.cooldown = 0;
-            this.maxCooldown = role === 'damage' ? 20 : 45;
+            // 變身/Buff狀態
+            this.dmgMult = 1; this.defMult = 1;
+            this.transformTimer = 0;
+            this.dashTimer = 0;
+            this.target = null;
         }
 
         draw() {
-            if (this.hp <= 0) return;
+            if(this.hp <= 0) return;
+            const screenX = this.x - camera.x;
+            const screenY = this.y - camera.y;
             
-            // 繪製氣場特效 (玩家或血量高時)
-            if (this.isPlayer || this.role === 'damage') {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius + 8, 0, Math.PI * 2);
-                ctx.fillStyle = this.team === 'blue' ? 'rgba(52, 152, 219, 0.3)' : 'rgba(231, 76, 60, 0.3)';
-                if(this.isPlayer) ctx.fillStyle = 'rgba(241, 196, 15, 0.4)';
-                ctx.fill();
-            }
+            // 在畫面外不繪製
+            if(screenX < -100 || screenX > camera.width+100 || screenY < -100 || screenY > camera.height+100) return;
+
+            // 繪製氣場
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, this.radius + 15 + Math.sin(Date.now()/100)*5, 0, Math.PI*2);
+            ctx.fillStyle = this.aura;
+            ctx.fill();
 
             // 角色本體
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.arc(screenX, screenY, this.radius, 0, Math.PI*2);
             ctx.fillStyle = this.color;
             ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = this.isPlayer ? '#fff' : (this.team==='blue' ? '#3498db' : '#e74c3c');
             ctx.stroke();
+            
+            // 內部特徵
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, this.radius*0.5, 0, Math.PI*2);
+            ctx.fillStyle = this.secondaryColor;
+            ctx.fill();
 
-            // 血條
-            const hpWidth = 40;
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.fillRect(this.x - hpWidth/2, this.y - this.radius - 12, hpWidth, 6);
+            // 名字與血條
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.name + (this.transformTimer>0?'(變身)':''), screenX, screenY - this.radius - 20);
+            
+            const hpW = 50;
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(screenX - hpW/2, screenY - this.radius - 15, hpW, 6);
             ctx.fillStyle = this.team === 'blue' ? '#2ecc71' : '#ff4757';
-            ctx.fillRect(this.x - hpWidth/2, this.y - this.radius - 12, hpWidth * (Math.max(0, this.hp) / this.maxHp), 6);
+            ctx.fillRect(screenX - hpW/2, screenY - this.radius - 15, hpW * Math.max(0, this.hp/this.maxHp), 6);
         }
 
-        update(entities) {
-            if (this.hp <= 0) return;
-            if (this.cooldown > 0) this.cooldown--;
+        update() {
+            if(this.hp <= 0) return;
+            
+            // 更新冷卻與狀態
+            for(let i=0; i<4; i++) if(this.cooldowns[i]>0) this.cooldowns[i]--;
+            
+            if(this.transformTimer > 0) {
+                this.transformTimer--;
+                if(this.transformTimer === 0) this.resetBuffs();
+            }
+            if(this.dashTimer > 0) {
+                this.dashTimer--;
+                if(this.dashTimer === 0) this.speed = this.baseSpeed * (this.transformTimer>0 ? this.skills[3].buff.speed || 1 : 1);
+            }
 
-            if (this.isPlayer) {
-                // 處理移動 (搖桿與鍵盤混合)
-                let dx = 0;
-                let dy = 0;
-
-                // 搖桿輸入
-                if (Math.abs(touchInput.vx) > 0.1 || Math.abs(touchInput.vy) > 0.1) {
-                    dx = touchInput.vx * this.speed;
-                    dy = touchInput.vy * this.speed;
-                } else {
-                    // 鍵盤輸入
-                    if (keys.a) dx = -this.speed;
-                    if (keys.d) dx = this.speed;
-                    if (keys.w) dy = -this.speed;
-                    if (keys.s) dy = this.speed;
-                }
-
-                this.x += dx;
-                this.y += dy;
-
-                // 處理攻擊 (自動鎖定最近目標)
-                if (touchInput.isAttacking && this.cooldown === 0) {
-                    const target = findNearestEnemy(this, entities);
-                    if (target) {
-                        this.shoot(target.x, target.y);
+            if(this.isPlayer) {
+                // UI 更新技能冷卻
+                for(let i=0; i<4; i++) {
+                    const btn = document.getElementById(`btn-${i+1}`);
+                    if(this.cooldowns[i] > 0) {
+                        btn.classList.add('cooldown');
+                        btn.innerText = Math.ceil(this.cooldowns[i]/60);
                     } else {
-                        // 沒敵人時朝前方發射
-                        this.shoot(this.x + 100, this.y);
+                        btn.classList.remove('cooldown');
+                        btn.innerText = this.skills[i].name;
                     }
-                    this.cooldown = this.maxCooldown;
                 }
+
+                // 玩家移動
+                let dx = 0, dy = 0;
+                if(Math.abs(touchInput.vx)>0.1 || Math.abs(touchInput.vy)>0.1) {
+                    dx = touchInput.vx * this.speed; dy = touchInput.vy * this.speed;
+                } else {
+                    if(keys.a) dx = -this.speed; if(keys.d) dx = this.speed;
+                    if(keys.w) dy = -this.speed; if(keys.s) dy = this.speed;
+                }
+                this.x += dx; this.y += dy;
             } else {
-                // AI 行為模式
-                const target = findNearestEnemy(this, entities);
-
-                if (target) {
-                    const dx = target.x - this.x;
-                    const dy = target.y - this.y;
-                    const dist = Math.hypot(dx, dy);
-                    const angle = Math.atan2(dy, dx);
-
-                    // 依據定位決定距離
-                    const preferDist = this.role === 'tank' ? 100 : (this.role === 'tech' ? 350 : 250);
-
-                    if (dist > preferDist + 50) {
-                        this.x += Math.cos(angle) * this.speed * 0.8;
-                        this.y += Math.sin(angle) * this.speed * 0.8;
-                    } else if (dist < preferDist - 50) {
-                        this.x -= Math.cos(angle) * this.speed * 0.8;
-                        this.y -= Math.sin(angle) * this.speed * 0.8;
-                    }
-
-                    // 閃避微調
-                    if(Math.random() < 0.02) {
-                        this.x += (Math.random() - 0.5) * 100;
-                        this.y += (Math.random() - 0.5) * 100;
-                    }
-
-                    // 攻擊
-                    if (this.cooldown === 0 && Math.random() < 0.08) {
-                        this.shoot(target.x, target.y);
-                        this.cooldown = this.maxCooldown;
-                    }
-                }
+                // AI 行為
+                this.updateAI();
             }
 
             // 邊界限制
-            this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
-            this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+            this.x = Math.max(this.radius, Math.min(WORLD_WIDTH - this.radius, this.x));
+            this.y = Math.max(this.radius, Math.min(WORLD_HEIGHT - this.radius, this.y));
         }
 
-        shoot(targetX, targetY) {
-            const angle = Math.atan2(targetY - this.y, targetX - this.x);
-            // 坦克發射大而慢的波，攻擊手快，技術型有散彈
-            let speed = 9;
-            let dmg = 25;
-            let size = 8;
-            
-            if(this.role === 'tank') { speed = 5; dmg = 40; size = 15; }
-            if(this.role === 'tech') { dmg = 15; size = 6; }
+        updateAI() {
+            // 找尋目標
+            let minDist = Infinity;
+            this.target = null;
+            entities.forEach(e => {
+                if(e.hp>0 && e.team !== this.team) {
+                    const d = Math.hypot(e.x-this.x, e.y-this.y);
+                    if(d < minDist) { minDist = d; this.target = e; }
+                }
+            });
 
-            if(this.role === 'tech') {
-                projectiles.push(new Projectile(this.x, this.y, angle - 0.2, this.team, dmg, size, speed));
-                projectiles.push(new Projectile(this.x, this.y, angle + 0.2, this.team, dmg, size, speed));
+            if(this.target) {
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                const angle = Math.atan2(dy, dx);
+                
+                // 移動策略 (保持約 300 距離)
+                if(minDist > 350) {
+                    this.x += Math.cos(angle) * this.speed;
+                    this.y += Math.sin(angle) * this.speed;
+                } else if(minDist < 200) {
+                    this.x -= Math.cos(angle) * this.speed;
+                    this.y -= Math.sin(angle) * this.speed;
+                }
+
+                // 隨機使用技能 (AI作弊：冷卻快一點點)
+                if(Math.random() < 0.02) {
+                    const skillIdx = Math.floor(Math.random()*4);
+                    this.castSkill(skillIdx, this.target.x, this.target.y);
+                }
             }
-            projectiles.push(new Projectile(this.x, this.y, angle, this.team, dmg, size, speed));
+        }
+
+        castSkill(index, tx, ty) {
+            if(this.cooldowns[index] > 0) return;
+            const skill = this.skills[index];
+            this.cooldowns[index] = skill.cd;
+
+            // 決定目標方向 (玩家自動鎖定最近敵人，若無則朝滑鼠/正右方)
+            let targetX = tx, targetY = ty;
+            if(!targetX && this.isPlayer) {
+                let nearest = null, md = Infinity;
+                entities.forEach(e => {
+                    if(e.hp>0 && e.team !== this.team) {
+                        const d = Math.hypot(e.x-this.x, e.y-this.y);
+                        if(d < md) { md = d; nearest = e; }
+                    }
+                });
+                if(nearest) { targetX = nearest.x; targetY = nearest.y; }
+                else { targetX = this.x + 100; targetY = this.y; } // 預設方向
+            }
+
+            const angle = Math.atan2(targetY - this.y, targetX - this.x);
+
+            // 依據技能類型執行
+            switch(skill.type) {
+                case 'shoot':
+                    projectiles.push(new Projectile(this.x, this.y, angle, this.team, skill.dmg*this.dmgMult, skill.size, skill.speed, skill.color, skill.pierce));
+                    break;
+                case 'spread':
+                    for(let i=0; i<skill.count; i++) {
+                        const spreadAngle = angle + (i - Math.floor(skill.count/2)) * 0.2;
+                        projectiles.push(new Projectile(this.x, this.y, spreadAngle, this.team, skill.dmg*this.dmgMult, skill.size, skill.speed, skill.color));
+                    }
+                    break;
+                case 'beam':
+                    // 射線以極快子彈模擬
+                    projectiles.push(new Projectile(this.x, this.y, angle, this.team, skill.dmg*this.dmgMult, skill.size, skill.speed, skill.color, skill.pierce || true));
+                    break;
+                case 'teleport':
+                    this.x += Math.cos(angle) * skill.range;
+                    this.y += Math.sin(angle) * skill.range;
+                    effects.push(new VisualEffect(this.x, this.y, 'rgba(255,255,255,0.8)', 30));
+                    break;
+                case 'dash':
+                    this.speed = this.baseSpeed * skill.speedMult;
+                    this.dashTimer = skill.duration;
+                    break;
+                case 'aoe':
+                    effects.push(new VisualEffect(this.x, this.y, skill.color, skill.radius, true));
+                    entities.forEach(e => {
+                        if(e.hp>0 && e.team !== this.team && Math.hypot(e.x-this.x, e.y-this.y) <= skill.radius) {
+                            e.takeDamage(skill.dmg * this.dmgMult);
+                        }
+                    });
+                    break;
+                case 'heal':
+                    this.hp = Math.min(this.maxHp, this.hp + skill.amount);
+                    effects.push(new VisualEffect(this.x, this.y, '#2ecc71', this.radius+20));
+                    break;
+                case 'transform':
+                    this.transformTimer = skill.duration;
+                    const b = skill.buff;
+                    if(b.speed) this.speed = this.baseSpeed * b.speed;
+                    if(b.dmgMult) this.dmgMult = b.dmgMult;
+                    if(b.defMult) this.defMult = b.defMult;
+                    if(b.radiusMult) this.radius = this.baseRadius * b.radiusMult;
+                    if(b.aura) this.aura = b.aura;
+                    if(b.color) this.color = b.color;
+                    if(b.hpHeal) this.hp = Math.min(this.maxHp, this.hp + b.hpHeal);
+                    effects.push(new VisualEffect(this.x, this.y, '#f1c40f', 100)); // 爆氣特效
+                    break;
+            }
+        }
+
+        takeDamage(dmg) {
+            this.hp -= (dmg * this.defMult);
+        }
+
+        resetBuffs() {
+            this.dmgMult = 1; this.defMult = 1;
+            this.speed = this.baseSpeed;
+            this.radius = this.baseRadius;
+            this.aura = this.baseAura;
+            this.color = this.baseColor;
         }
     }
 
     class Projectile {
-        constructor(x, y, angle, team, damage, radius, speed) {
-            this.x = x;
-            this.y = y;
-            this.vx = Math.cos(angle) * speed;
-            this.vy = Math.sin(angle) * speed;
-            this.team = team;
-            this.damage = damage;
-            this.radius = radius;
-            this.color = team === 'blue' ? '#00d2d3' : '#ff9f43';
-            this.active = true;
+        constructor(x, y, angle, team, damage, radius, speed, color, pierce = false) {
+            this.x = x; this.y = y; this.vx = Math.cos(angle)*speed; this.vy = Math.sin(angle)*speed;
+            this.team = team; this.damage = damage; this.radius = radius;
+            this.color = color; this.pierce = pierce; this.active = true;
+            this.hitTargets = new Set(); // 記錄穿透擊中過的目標
         }
-
         draw() {
-            if (!this.active) return;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff'; // 核心
-            ctx.fill();
+            if(!this.active) return;
+            const sx = this.x - camera.x, sy = this.y - camera.y;
+            if(sx < -50 || sx > camera.width+50 || sy < -50 || sy > camera.height+50) return;
             
-            // 發光外圈
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius + 4, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.globalAlpha = 0.6;
-            ctx.fill();
-            ctx.globalAlpha = 1.0;
+            ctx.beginPath(); ctx.arc(sx, sy, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = '#fff'; ctx.fill();
+            ctx.beginPath(); ctx.arc(sx, sy, this.radius+4, 0, Math.PI*2);
+            ctx.fillStyle = this.color; ctx.globalAlpha = 0.6; ctx.fill(); ctx.globalAlpha = 1.0;
         }
-
         update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-                this.active = false;
-            }
+            this.x += this.vx; this.y += this.vy;
+            if(this.x<0 || this.x>WORLD_WIDTH || this.y<0 || this.y>WORLD_HEIGHT) this.active = false;
         }
     }
 
-    // 初始化隊伍 (4v4)
-    let entities = [];
-    let projectiles = [];
-    let isGameOver = false;
+    class VisualEffect {
+        constructor(x, y, color, maxRadius, isExplosion=false) {
+            this.x = x; this.y = y; this.color = color; this.maxRadius = maxRadius;
+            this.radius = 5; this.active = true; this.isExplosion = isExplosion; this.alpha = 1;
+        }
+        draw() {
+            if(!this.active) return;
+            const sx = this.x - camera.x, sy = this.y - camera.y;
+            ctx.beginPath(); ctx.arc(sx, sy, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = this.color; ctx.globalAlpha = this.alpha; ctx.fill(); ctx.globalAlpha = 1.0;
+        }
+        update() {
+            this.radius += (this.maxRadius - this.radius) * 0.2;
+            this.alpha -= 0.05;
+            if(this.alpha <= 0) this.active = false;
+        }
+    }
 
-    function initGame() {
-        entities = [];
-        projectiles = [];
-        isGameOver = false;
-        gameOverEl.style.display = 'none';
+    // ==========================================
+    // 遊戲主流程
+    // ==========================================
+    function startGame() {
+        document.getElementById('select-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        resize();
 
-        // 藍隊 (我方)
-        entities.push(new Character(150, canvas.height/2, 'blue', true, 'damage')); // 玩家 (悟空定位)
-        entities.push(new Character(100, canvas.height/4, 'blue', false, 'tank'));
-        entities.push(new Character(100, canvas.height*3/4, 'blue', false, 'tech'));
-        entities.push(new Character(50, canvas.height/2, 'blue', false, 'damage'));
+        entities = []; projectiles = []; effects = []; isGameOver = false;
+        document.getElementById('game-over').style.display = 'none';
 
-        // 紅隊 (敵方 BOSS/對手)
-        entities.push(new Character(canvas.width - 150, canvas.height/2, 'red', false, 'damage')); // 敵方主力 (達爾/弗利沙定位)
-        entities.push(new Character(canvas.width - 100, canvas.height/4, 'red', false, 'tank'));
-        entities.push(new Character(canvas.width - 100, canvas.height*3/4, 'red', false, 'tech'));
-        entities.push(new Character(canvas.width - 50, canvas.height/2, 'red', false, 'damage'));
+        // 建立隊伍
+        const teamIds = Object.keys(CHARACTERS);
+        
+        // 藍隊(我方)
+        player = new Character(WORLD_WIDTH/2 - 200, WORLD_HEIGHT/2, 'blue', selectedCharId, true);
+        entities.push(player);
+        for(let i=0; i<3; i++) {
+            let rndId = teamIds[Math.floor(Math.random()*teamIds.length)];
+            entities.push(new Character(WORLD_WIDTH/2 - 300, WORLD_HEIGHT/2 + (i-1)*150, 'blue', rndId, false));
+        }
+
+        // 紅隊(敵方)
+        for(let i=0; i<4; i++) {
+            let rndId = teamIds[Math.floor(Math.random()*teamIds.length)];
+            entities.push(new Character(WORLD_WIDTH/2 + 300, WORLD_HEIGHT/2 + (i-1.5)*150, 'red', rndId, false));
+        }
+
+        gameLoop();
     }
 
     function checkCollisions() {
         projectiles.forEach(p => {
-            if (!p.active) return;
+            if(!p.active) return;
             entities.forEach(e => {
-                if (e.hp > 0 && e.team !== p.team) {
+                if(e.hp>0 && e.team !== p.team) {
+                    if(p.hitTargets.has(e)) return; // 已經穿透打過
                     const dist = Math.hypot(e.x - p.x, e.y - p.y);
-                    if (dist < e.radius + p.radius) {
-                        e.hp -= p.damage;
-                        p.active = false;
-                        
-                        // 命中特效 (簡化版：將角色往後推一點)
-                        e.x += p.vx * 0.2;
-                        e.y += p.vy * 0.2;
+                    if(dist < e.radius + p.radius) {
+                        e.takeDamage(p.damage);
+                        effects.push(new VisualEffect(p.x, p.y, '#fff', 15));
+                        if(p.pierce) p.hitTargets.add(e);
+                        else p.active = false;
                     }
                 }
             });
         });
     }
 
-    function gameLoop() {
-        if (isGameOver) return;
+    function drawBackground() {
+        // 繪製格線/大地背景 (隨攝影機移動)
+        ctx.fillStyle = '#3e8e41';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#2c7a2f';
+        ctx.lineWidth = 2;
+        const gridSize = 100;
+        const offsetX = -(camera.x % gridSize);
+        const offsetY = -(camera.y % gridSize);
+        
+        for(let x = offsetX; x < canvas.width; x += gridSize) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for(let y = offsetY; y < canvas.height; y += gridSize) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
 
-        let blueAlive = 0;
-        let redAlive = 0;
+        // 繪製世界邊界 (如果攝影機看得到)
+        ctx.strokeStyle = '#ff0000'; ctx.lineWidth = 10;
+        ctx.strokeRect(-camera.x, -camera.y, WORLD_WIDTH, WORLD_HEIGHT);
+    }
+
+    function gameLoop() {
+        if(isGameOver) return;
+        
+        // 更新攝影機追蹤玩家
+        if(player) {
+            camera.x = player.x - camera.width/2;
+            camera.y = player.y - camera.height/2;
+            // 限制攝影機在世界內 (可選，讓邊界更明顯)
+            camera.x = Math.max(-500, Math.min(WORLD_WIDTH - camera.width + 500, camera.x));
+            camera.y = Math.max(-500, Math.min(WORLD_HEIGHT - camera.height + 500, camera.y));
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+
+        let bAlive = 0, rAlive = 0;
+        
+        // 排序讓 y 座標小的先畫 (稍微有立體感)
+        entities.sort((a,b) => a.y - b.y);
 
         entities.forEach(e => {
-            e.update(entities);
+            e.update();
             e.draw();
-            if (e.hp > 0) {
-                if (e.team === 'blue') blueAlive++;
-                if (e.team === 'red') redAlive++;
-            }
+            if(e.hp>0) { e.team==='blue' ? bAlive++ : rAlive++; }
         });
 
-        blueScoreEl.innerText = blueAlive;
-        redScoreEl.innerText = redAlive;
+        document.getElementById('blue-score').innerText = bAlive;
+        document.getElementById('red-score').innerText = rAlive;
 
-        projectiles.forEach(p => {
-            p.update();
-            p.draw();
-        });
-        
+        projectiles.forEach(p => { p.update(); p.draw(); });
         checkCollisions();
         projectiles = projectiles.filter(p => p.active);
 
+        effects.forEach(ef => { ef.update(); ef.draw(); });
+        effects = effects.filter(ef => ef.active);
+
         // 勝負判斷
-        if (blueAlive === 0 || redAlive === 0) {
+        if(bAlive === 0 || rAlive === 0) {
             isGameOver = true;
-            gameOverEl.style.display = 'block';
-            if (blueAlive > 0) {
-                resultTextEl.innerText = 'VICTORY！敵方小隊已全滅';
-                resultTextEl.style.color = '#3498db';
-            } else {
-                resultTextEl.innerText = 'DEFEAT！我方小隊已全滅';
-                resultTextEl.style.color = '#e74c3c';
-            }
+            document.getElementById('game-over').style.display = 'flex';
+            const rt = document.getElementById('result-text');
+            if(bAlive > 0) { rt.innerText = 'VICTORY！'; rt.style.color = '#3498db'; }
+            else { rt.innerText = 'DEFEAT...'; rt.style.color = '#e74c3c'; }
         }
 
-        if (!isGameOver) {
-            requestAnimationFrame(gameLoop);
-        }
+        if(!isGameOver) requestAnimationFrame(gameLoop);
     }
-
-    // 啟動遊戲
-    initGame();
-    // 確保搖桿中心點在畫面載入後正確計算
-    setTimeout(() => { if(joystickZone) initJoystick(); }, 500);
-    gameLoop();
 </script>
-
 </body>
 </html>
