@@ -1,1017 +1,427 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
- content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>龍珠小隊戰場 V2</title>
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>龍珠小隊戰場 III</title>
 <style>
-*{box-sizing:border-box}
-html,body{
- margin:0;width:100%;height:100%;overflow:hidden;
- background:#081320;color:#edf6ff;
- font-family:system-ui,"Microsoft JhengHei",sans-serif;
-}
-button,select{font:inherit}
-button{cursor:pointer}
-#app{height:100%;display:flex;flex-direction:column}
-header{
- display:flex;justify-content:space-between;align-items:center;
- gap:8px;background:#111e31;padding:8px 12px;
- border-bottom:1px solid #37516a;
-}
-.brand{font-weight:900;color:#ffd078}
-#score{font-size:12px;text-align:center}
-.tools{display:flex;gap:6px}
-.tools button{
- border:1px solid #526b88;border-radius:8px;
- background:#243950;color:white;padding:7px 9px;
-}
-#stage{position:relative;flex:1;min-height:0;overflow:hidden}
-canvas{width:100%;height:100%;display:block;touch-action:none}
-#notice{
- position:absolute;top:10px;left:12px;
- max-width:calc(100% - 205px);padding:8px 12px;
- border-radius:12px;background:#071729d9;
- color:#fff0cb;font-size:12px;pointer-events:none;
-}
-#status{
- position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
- background:#071729dd;padding:9px 12px;border-radius:12px;
- text-align:center;font-size:12px;pointer-events:none;
- min-width:230px;
-}
-#stick{
- position:absolute;left:22px;bottom:30px;
- width:112px;height:112px;border-radius:50%;
- background:#b6dfff18;border:2px solid #c8e8ff70;
- touch-action:none;
-}
-#knob{
- position:absolute;width:42px;height:42px;left:33px;top:33px;
- background:#c3e7ffa0;border:2px solid #e8f8ff;
- border-radius:50%;pointer-events:none;
-}
-#actions{
- position:absolute;right:12px;bottom:20px;
- display:grid;grid-template-columns:repeat(3,72px);gap:6px;
-}
-.action{
- height:59px;padding:4px;border:1px solid #8095b8;
- border-radius:13px;color:white;background:#1d314ce8;
- font-size:12px;touch-action:none;user-select:none;
- -webkit-user-select:none;-webkit-touch-callout:none;
-}
-.action.primary{background:#a75920eb;border-color:#ffc575}
-.action.ultimate{background:#5b3c92eb;border-color:#c9a6ff}
-.action.cool{opacity:.65}
-.action.held{outline:3px solid #ffdc88;filter:brightness(1.3)}
-.overlay{
- position:absolute;inset:0;background:#06101ef0;z-index:10;
- display:flex;align-items:center;justify-content:center;padding:16px;
-}
-.panel{
- max-width:950px;width:100%;max-height:100%;overflow:auto;
- padding:22px;border-radius:20px;background:#13243a;
- border:1px solid #45607c;
-}
-h1{margin:0 0 10px;color:#ffd080;font-size:28px}
-p{line-height:1.6}
-.small{font-size:12px;color:#adbed4;line-height:1.7}
-#cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.card{
- text-align:left;padding:11px;border:2px solid #304860;
- border-radius:11px;background:#0b1b2e;color:white;
-}
-.card.selected{border-color:#ffd17c;background:#3b3025}
-.card strong{display:block;font-size:18px;margin-bottom:5px}
-.card span{font-size:11px;line-height:1.7;color:#bfd0e3}
-.start{
- width:100%;padding:12px;margin-top:14px;border:0;
- border-radius:11px;background:#ffc06b;color:#261b10;
- font-weight:bold;font-size:18px;
-}
-select{padding:5px;border-radius:6px}
-.hidden{display:none!important}
-#resultText{white-space:pre-line}
-@media(max-width:650px){
- header{padding:6px}
- .brand{font-size:12px}
- #score{font-size:10px}
- .tools button{font-size:11px;padding:6px}
- #cards{grid-template-columns:repeat(3,1fr)}
- .card{padding:8px}
- .card strong{font-size:15px}
- .panel{padding:14px}
- h1{font-size:23px}
- #actions{grid-template-columns:repeat(3,58px);right:7px}
- .action{height:53px;font-size:10px}
- #stick{left:12px;bottom:25px;width:100px;height:100px}
- #knob{left:27px;top:27px}
- #status{bottom:145px;font-size:10px}
- #notice{font-size:10px;max-width:calc(100% - 160px)}
-}
+*{box-sizing:border-box}body{margin:0;background:#101b29;color:#fff3d4;font:15px system-ui}canvas#field{position:fixed;inset:0;width:100%;height:100%;touch-action:none}button,select{font:inherit;color:inherit;background:#223349;border:1px solid #697b8d;border-radius:8px;padding:8px;touch-action:none}button{cursor:pointer;user-select:none;-webkit-user-select:none}.sheet{position:fixed;inset:0;overflow:auto;background:linear-gradient(135deg,#14243a,#0b131f);padding:clamp(14px,4vw,50px)}main{max-width:980px;margin:auto}h1{font-size:clamp(26px,5vw,50px);margin:.12em 0}small{color:#ffc660;letter-spacing:.14em}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:7px}.card{display:grid;justify-items:center;background:linear-gradient(150deg,#314458,#192639);padding:4px}.card.sel{border:2px solid #ffc660;background:#51412c}.card svg{height:75px}.card span{font-size:12px;color:#d4dfeb}.gold{background:#ffbd56;color:#241b0f;font-weight:bold}.launch{position:sticky;bottom:0;background:#152439;padding:9px;border-radius:9px;margin-top:12px}#bar,#pad,#acts{position:fixed}#bar{top:6px;left:8px;background:#112034e8;padding:5px;border-radius:8px;font-size:12px;max-width:68%}#pad{bottom:16px;left:18px;width:100px;height:100px;border:2px solid #a4c3cf80;border-radius:50%;background:#15273b88;touch-action:none;display:grid;place-items:center}#nub{background:#cbe5ed99;width:38px;height:38px;border-radius:50%;pointer-events:none}#acts{bottom:12px;right:10px;display:grid;grid-template-columns:repeat(3,minmax(45px,1fr));gap:4px}#acts button{font-size:12px;min-height:43px;background:#192e46ee}#acts button.down{background:#866022}[hidden]{display:none!important}p{line-height:1.6}
 </style>
-</head>
-<body>
-<div id="app">
-<header>
- <div class="brand">龍珠小隊戰場 V2</div>
- <div id="score">12 位角色・4 VS 4</div>
- <div class="tools">
-  <button id="pause">暫停</button>
-  <button id="menuButton">選角</button>
- </div>
-</header>
-<div id="stage">
- <canvas id="game"></canvas>
- <div id="notice">長按普攻與氣功即可連續使用</div>
- <div id="status"></div>
- <div id="stick"><div id="knob"></div></div>
- <div id="actions">
-  <button class="action" data-action="dash">衝刺</button>
-  <button class="action" data-action="skill">特殊技</button>
-  <button class="action ultimate" data-action="ult">大絕招</button>
-  <button class="action primary" data-action="attack">普攻</button>
-  <button class="action primary" data-action="blast">氣功</button>
-  <button class="action" data-action="form">變身</button>
- </div>
-
- <div id="menu" class="overlay">
-  <div class="panel">
-   <h1>選擇你的戰士</h1>
-   <p class="small">
-    你＋3 名 AI 隊友，對抗4 名敵人。打掉任一路的外塔與內塔，
-    再將敵方龍珠的 6,000 耐久打完！<br>
-    場地面積為第一版的10倍，鏡頭會跟隨你；右上小地圖顯示戰況。
-   </p>
-   <div id="cards"></div>
-   <p class="small">
-    電腦：WASD／方向鍵移動，長按 J 普攻、Q 氣功。
-    E 特殊技、R 大絕招、空白鍵衝刺、F 變身、P 暫停。<br>
-    iPad：左下搖桿移動，右下按鈕使用技能；普攻和氣功可以持續按住。<br>
-    大絕招等級2開放，變身等級3開放。基地會回復生命。
-    倒下後自動復活。地形裝飾不阻擋移動。
-   </p>
-   <label>難度：
-    <select id="difficulty">
-     <option value="0.8">練習</option>
-     <option value="1" selected>普通</option>
-     <option value="1.2">困難</option>
-    </select>
-   </label>
-   <button id="start" class="start">開始戰鬥</button>
-   <p class="small">自製單機同人原型，非官方遊戲；沒有多人連線。</p>
-  </div>
- </div>
-
- <div id="result" class="overlay hidden">
-  <div class="panel">
-   <h1 id="resultTitle"></h1>
-   <p id="resultText"></p>
-   <button id="again" class="start">再戰一次</button>
-  </div>
- </div>
+<canvas id="field"></canvas>
+<div id="ui" hidden>
+ <div id="bar"><span id="hud"></span> <button id="pause">暫停</button> <button id="back">選角</button></div>
+ <div id="pad"><i id="nub"></i></div><div id="acts"></div>
 </div>
-</div>
-
+<section id="menu" class="sheet"><main>
+ <small>英雄圖鑑　／　VOL. 03</small><h1>龍珠小隊戰場</h1>
+ <p>選一位戰士，和三名隊友突破任一路外塔、內塔，再擊破敵方龍珠的 6,000 點耐久。</p>
+ <div id="cards" class="grid"></div>
+ <div class="launch"><b id="detail"></b>
+  <select id="diff"><option value=".8">練習</option><option selected value="1">普通</option><option value="1.2">困難</option></select>
+  <button class="gold" id="start">出戰 →</button>
+ </div>
+ <p>WASD／方向鍵移動，長按 J 普攻、Q 氣功。E 特殊技、R 大絕、空白鍵衝刺、F 強化、P 暫停。iPad 可同時推搖桿與長按攻擊。大絕於 Lv.2、強化於 Lv.3 解鎖。</p>
+</main></section>
 <script>
 "use strict";
+const $=s=>document.getElementById(s),g=$("field").getContext("2d"),
+ W=1800*Math.sqrt(10),H=1000*Math.sqrt(10),C=["#68dbff","#ff788c"];
 
-/* ---------- 世界與角色資料 ---------- */
-const $=id=>document.getElementById(id);
-const canvas=$("game"),ctx=canvas.getContext("2d");
-const FACTOR=Math.sqrt(10);
-const W=1800*FACTOR,H=1000*FACTOR;
-const LANES=[H*.29,H*.71];
-const BLUE="#6bcfff",RED="#ff7b91";
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-const random=(a,b)=>a+Math.random()*(b-a);
-
-const DATA=[
- {name:"悟空",role:"傷害",color:"#f2963d",skin:"#efbd93",hair:"spike",
-  hp:1250,power:48,speed:330,skill:"瞬身連擊",ult:"元氣彈",
-  special:"rush",ultimate:"bomb",form:"超級賽亞人"},
- {name:"貝吉達",role:"坦克",color:"#4269dd",skin:"#efbd93",hair:"spike",
-  hp:1700,power:40,speed:310,skill:"戰鬥護盾",ult:"終極閃光",
-  special:"shield",ultimate:"beam",form:"超級賽亞人"},
- {name:"比克",role:"支援",color:"#905cc1",skin:"#79c76b",hair:"bald",
-  hp:1400,power:41,speed:320,skill:"再生領域",ult:"魔貫光殺炮",
-  special:"heal",ultimate:"pierce",form:"潛能解放"},
- {name:"克林",role:"控制",color:"#e4a348",skin:"#edb992",hair:"bald",
-  hp:1200,power:39,speed:350,skill:"太陽拳",ult:"連續氣圓斬",
-  special:"stun",ultimate:"discs",form:"潛能解放"},
- {name:"悟飯",role:"傷害",color:"#a27bdd",skin:"#efbd93",hair:"spike",
-  hp:1320,power:49,speed:335,skill:"爆發連擊",ult:"究極氣功",
-  special:"rush",ultimate:"beam",form:"野獸悟飯"},
- {name:"特南克斯",role:"近戰",color:"#5c9adc",skin:"#efbd93",hair:"short",
-  hp:1380,power:47,speed:350,skill:"劍刃旋風",ult:"燃燒攻擊",
-  special:"spin",ultimate:"bomb",form:"超級賽亞人"},
- {name:"弗利沙",role:"遠程",color:"#e6e4ef",skin:"#e0cfee",hair:"bald",
-  hp:1250,power:50,speed:330,skill:"死亡光束",ult:"超新星",
-  special:"snipe",ultimate:"bomb",form:"黃金弗利沙"},
- {name:"賽魯",role:"恢復",color:"#5cad5d",skin:"#b4c893",hair:"horn",
-  hp:1570,power:43,speed:315,skill:"生命吸收",ult:"完全體氣功",
-  special:"drain",ultimate:"beam",form:"超完全體"},
- {name:"魔人普烏",role:"支援",color:"#e39ac5",skin:"#efb0d0",hair:"bald",
-  hp:1850,power:35,speed:295,skill:"魔人再生",ult:"爆發波",
-  special:"heal",ultimate:"nova",form:"魔人強化"},
- {name:"布羅利",role:"坦克",color:"#71bc64",skin:"#dfb18b",hair:"spike",
-  hp:2050,power:46,speed:290,skill:"狂暴震地",ult:"巨型能量彈",
-  special:"spin",ultimate:"bomb",form:"傳說超級賽亞人"},
- {name:"希特",role:"刺客",color:"#78659f",skin:"#aaa1c2",hair:"bald",
-  hp:1230,power:47,speed:365,skill:"閃時突襲",ult:"時之牢籠",
-  special:"time",ultimate:"freeze",form:"時間解放"},
- {name:"比魯斯",role:"破壞",color:"#528eaa",skin:"#a68bc9",hair:"ears",
-  hp:1390,power:52,speed:340,skill:"破壞衝擊",ult:"破壞能量球",
-  special:"burst",ultimate:"bomb",form:"破壞神之力"}
+// 名稱、衣色、膚色、髮色、生命、攻擊、速度、特殊技、大絕、強化
+const D=[
+["悟空","#f48128","#f4bd93","#182033",1250,48,330,"瞬身連擊","元氣彈","超級賽亞人"],
+["貝吉達","#304dc3","#edb18e","#141829",1700,40,310,"戰鬥護盾","終極閃光","超級賽亞人"],
+["比克","#694496","#8ac668","#fff",1400,41,320,"再生領域","魔貫光殺炮","潛能解放"],
+["克林","#ee932e","#eeb18c","#000",1200,39,350,"太陽拳","連續氣圓斬","潛能解放"],
+["悟飯","#704592","#efb68c","#212333",1320,49,335,"爆發連擊","究極氣功","野獸悟飯"],
+["特南克斯","#627fc7","#f2c49e","#b4a0de",1380,47,350,"劍刃旋風","燃燒攻擊","超級賽亞人"],
+["弗利沙","#f1e6ec","#eee1ed","#9865bc",1250,50,330,"死亡光束","超新星","黃金弗利沙"],
+["賽魯","#75a956","#aad082","#384743",1570,43,315,"生命吸收","完全體氣功","超完全體"],
+["魔人普烏","#352f44","#f4a2be","#ef91b0",1850,35,295,"魔人再生","爆發波","魔人強化"],
+["布羅利","#79b24f","#dba680","#232735",2050,46,290,"狂暴震地","巨型能量彈","傳說超級賽亞人"],
+["希特","#554d71","#ae96be","#65597a",1230,47,365,"閃時突襲","時之牢籠","時間解放"],
+["比魯斯","#3e90ae","#a484c5","#ae85c9",1390,52,340,"破壞衝擊","破壞能量球","破壞神之力"],
+["人造人17號","#242b32","#f1c19d","#222531",1310,44,346,"能源防護壁","超級電擊","能量提升"],
+["人造人18號","#557bb1","#f1c6a2","#f2d071",1290,46,340,"連環飛踢","雙重氣圓斬","能量提升"],
+["札馬斯","#46475d","#9aca86","#eff4eb",1480,42,325,"神之再生","神裂光刃","神氣解放"],
+["達普拉","#4267a4","#d9645c","#272036",1560,44,313,"石化魔唾","魔界烈焰","魔王之力"],
+["克維拉","#695083","#9277ac","#e5e6eb",1740,46,316,"裝甲突擊","超級新星","能量全開"],
+["悟吉塔","#302e39","#efb58f","#f9d454",1440,51,355,"星塵突擊","星塵碎擊","超藍悟吉塔"]
 ];
 
-let selected=0,heroes=[],towers=[],cores=[],shots=[],fx=[],labels=[];
-let player=null,running=false,paused=false,ended=false;
-let time=0,last=0,hudTimer=0,noticeEnd=0;
-let kills=[0,0],difficulty=1;
-let vw=0,vh=0,zoom=1,dpr=1,camera={x:W/2,y:H/2};
-let keys={},touchActions=new Map(),joy={x:0,y:0},stickId=null;
-const buttons=[...document.querySelectorAll("[data-action]")];
-const mapKeys={
- KeyJ:"attack",KeyQ:"blast",KeyE:"skill",
- KeyR:"ult",Space:"dash",KeyF:"form"
-};
-const costs={attack:0,blast:5,skill:25,ult:50,dash:12,form:60};
-const cooldowns={attack:.28,blast:.32,skill:7,ult:18,dash:2.8,form:30};
+const path=(d,f)=>'<path d="'+d+'" fill="'+f+'"/>';
+const oval=(x,y,a,b,f)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+a+'" ry="'+b+'" fill="'+f+'"/>';
 
-function resize(){
- const r=$("stage").getBoundingClientRect();
- vw=r.width;vh=r.height;dpr=Math.min(devicePixelRatio||1,2);
- canvas.width=Math.round(vw*dpr);canvas.height=Math.round(vh*dpr);
- zoom=clamp(Math.min(vw/1200,vh/760),.43,1.1);
-}
-window.addEventListener("resize",resize);
-resize();
-
-function cards(){
- $("cards").innerHTML=DATA.map((d,i)=>`
-  <button class="card ${i===selected?"selected":""}" data-id="${i}">
-   <strong style="color:${d.color}">${d.name}</strong>
-   <span>${d.role}型・HP ${d.hp}<br>
-   ${d.skill}<br>${d.ult}</span>
-  </button>`).join("");
- $("cards").querySelectorAll("button").forEach(b=>{
-  b.onclick=()=>{selected=Number(b.dataset.id);cards()};
- });
-}
-cards();
-
-function say(s,duration=4){
- $("notice").textContent=s;noticeEnd=time+duration;
-}
-function label(x,y,s,color="#fff"){
- labels.push({x,y,s,color,life:.9});
-}
-function ring(x,y,r,color,duration=.45){
- fx.push({type:"ring",x,y,r,color,life:duration,max:duration});
-}
-function line(x,y,tx,ty,color,width=8){
- fx.push({type:"line",x,y,tx,ty,color,width,life:.23,max:.23});
-}
-function alive(o){return o.hp>0&&!(o.dead>0)}
-function baseX(team){return team===0?220:W-220}
-function createHero(type,team,index){
- const d=DATA[type],f=team===1?difficulty:1;
- return {
-  kind:"hero",type,team,index,name:d.name,
-  x:baseX(team),y:H/2+(index-1.5)*70,
-  hp:d.hp*f,maxHp:d.hp*f,power:d.power*f,speed:d.speed,
-  level:1,xp:0,ki:100,lane:index%2,dead:0,
-  angle:team===0?0:Math.PI,
-  cd:{attack:0,blast:0,skill:0,ult:0,dash:0,form:0},
-  stun:0,shield:0,inv:0,form:0,
-  kills:0,deaths:0,think:random(0,.3),passive:0,attackAnim:0
- };
-}
-function shuffle(a){
- for(let i=a.length-1;i>0;i--){
-  const j=Math.floor(Math.random()*(i+1));
-  [a[i],a[j]]=[a[j],a[i]];
+// 同一套向量圖用於角色卡及戰場，不需外部圖片。
+function art(i,on=false){
+ let [,s,k,h]=D[i],ink="#20202c",gold="#ffdd64",white="#fff2dc",p=path,e=oval;
+ if(on){
+  if([0,1,5].includes(i))h=gold;
+  if(i===4)h="#e9e7ff";
+  if(i===9)h="#b7ef48";
+  if(i===17)h="#41caff";
+  if(i===6)s=k="#e8bc48";
  }
- return a;
+ let a="",b="",head="",extra="";
+ if([2,8,15].includes(i))
+  a+=p("M32 53Q50 43 67 53L84 96 59 87 43 100 17 96Z",i===2?"#eeeae0":i===8?"#775392":"#ede4d0");
+ if([6,11,16].includes(i))
+  a+=p("M55 82Q92 102 86 56Q99 102 73 101L48 93Z",k);
+ if(i===5)
+  a+=p("M18 95L67 35 72 39 23 101Z","#c3d6df")+p("M61 40L77 48 80 44 64 35Z","#cda846");
+ if(i===7)a+=p("M30 56L15 100 42 89 58 89 83 100 69 56Z","#27313a");
+
+ let pants=[8,17].includes(i)?"#f8efdb":[0,3,4].includes(i)?s:"#344059";
+ b+=p("M36 78L64 78 67 97 56 105 50 90 44 104 31 99Z",pants)
+   +p("M32 96L44 99 43 108 26 108Z M56 98L66 96 74 107 57 108Z","#27354c");
+ b+=p("M32 51Q48 45 68 51L73 65 63 70 64 84Q49 90 34 83L35 68 26 64Z",s);
+ if([0,3,4].includes(i))
+  b+=p("M36 51L50 67 61 51 54 50 49 58 43 50Z","#243b65")+e(59,63,4,4,"#fff4d5");
+ if(i===1)b+=p("M32 52L38 50 41 58 58 58 61 50 67 52 63 72 38 72Z","#e8e9de")
+  +p("M39 69L62 69 59 79 41 79Z","#dab26b");
+ if(i===2)b+=p("M26 53Q39 43 51 53Q63 43 73 54L60 65 49 59 36 65Z","#fcf7e7");
+ if(i===8)b+=e(50,76,22,15,k)+p("M29 81Q50 90 71 81L67 90 34 90Z",gold);
+ if(i===9)b+=p("M31 54Q50 45 68 53L64 76 50 81 35 75Z",k)
+  +p("M33 77L67 77 70 92 59 87 53 94 43 87 31 91Z","#8bb94b");
+ if([10,14,15].includes(i))b+=p("M35 54L49 61 64 51 59 78 66 96 51 90 34 97 40 78Z",s);
+ if(i===11)b+=p("M31 52Q50 64 69 52L62 66 50 72 37 65Z","#202938")+p("M49 60L56 66 50 72 44 66Z","#f6cb60");
+ if(i===12)b+=p("M31 52L65 52 48 64Z","#f18a39");
+ if(i===13)b+=p("M36 52L43 53 45 77 56 77 57 52 64 52 66 81 35 81Z","#344d79");
+ if(i===17)b+=p("M32 51Q38 45 46 51L42 68 34 60Z M55 51Q63 45 69 53L64 63 57 68Z","#f5bb46")
+  +p("M43 55L56 54 53 77 46 78Z",k);
+ b+=p("M34 78Q49 82 65 78L64 84 35 85Z",i===14?"#e25650":i===8?gold:"#30486c");
+ b+=p("M28 59Q19 66 22 77L30 79 38 66Z M68 58L78 63 84 58 90 64Q81 82 69 75L61 66Z",k);
+ if(i===13)for(let j=0;j<3;j++)b+=p("M"+(24+j)+" "+(68+j*3)+"l8 3 1 -2 -8 -3Z",ink);
+
+ if([2,14,15].includes(i))head+=p("M34 34L19 27 31 45 39 45 M66 34L81 27 70 44 62 45",k);
+ if(i===11)head+=p("M35 36Q23 1 30 3L46 27 M54 27L69 2Q77 2 65 38",k);
+ head+=p("M31 32Q30 15 50 15Q70 15 69 34L66 45 54 54 46 54 34 44Z",k);
+ head+=p("M35 33L47 37 45 41 36 39Z M53 37L65 33 63 39 55 41Z",i===11?gold:"#fff")
+  +p("M42 36L45 37 44 40 42 39Z M56 37L59 36 58 40 56 40Z",ink)
+  +p("M46 46Q51 48 56 45L51 48Z",ink);
+ if([0,1,4,9,17].includes(i)){
+  const styles=[
+   "M28 37L16 29 29 26 11 17 36 19 29 7 44 15 53 2 59 16 77 9 70 22 82 23 65 34 65 27 53 26 43 37 44 26 34 31Z",
+   "M31 34L23 18 30 20 27 6 40 14 44 0 51 10 58 1 60 12 72 7 69 23 65 33 58 24 50 33 41 24Z",
+   "M28 31L20 15 33 18 28 4 44 12 53 1 60 12 73 6 70 22 62 30 53 24 44 41 45 26Z"
+  ];
+  head+=p(styles[i===1?1:i===4?2:0],h);
+ }
+ if([5,12,13].includes(i))
+  head+=p(i===13?"M29 47Q21 17 39 13Q68 3 72 31L71 54 61 47 62 22Q48 30 34 33L35 48Z":"M27 48Q21 12 43 12Q69 7 73 31L70 53 61 43 61 29 50 19 36 34 35 46Z",h);
+ if(i===2)head+=p("M29 31Q27 12 42 15Q48 6 62 17L69 29 55 25 38 31Z","#f2eee0");
+ if(i===3)for(let j=0;j<6;j++)head+=e(46+j%2*7,21+Math.floor(j/2)*4,1,1,"#77523e");
+ if(i===6)head+=e(50,23,15,8,"#9855b3");
+ if(i===7||i===16)head+=p("M28 37L22 8 43 18 52 23 71 4 75 30 65 38 61 29 39 29Z",i===7?"#79a855":"#e8e6ef");
+ if(i===7)for(const [x,y] of [[31,21],[35,24],[64,21],[66,17],[39,58],[57,70]])extra+=e(x,y,2,2,ink);
+ if(i===16)head+=p("M32 40L48 44 68 35 63 48 51 55 38 49Z","#e8e6ef");
+ if(i===8)head+=p("M43 19Q43 3 59 7Q70 13 78 6Q76 20 59 16L54 23Z",k);
+ if(i===10)head+=p("M47 16L51 15 52 31 49 34Z","#877491");
+ if(i===14)head+=p("M28 31Q23 20 34 14L23 9 41 10 42 2 55 9 75 5 66 17 74 18 60 27 51 20 36 31Z",h)+e(70,44,3,5,gold);
+ if(i===15)head+=p("M32 23L32 8 43 20Z M59 19L68 7 67 25Z",white)+p("M41 44L50 41 59 44 52 45 50 53 46 45Z",ink);
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112"><g stroke="#252237" stroke-width="1.4" stroke-linejoin="round">'+a+b+head+extra+'</g></svg>';
 }
-function resetInput(){
- keys={};touchActions.clear();joy={x:0,y:0};stickId=null;
- $("knob").style.transform="translate(0,0)";
- buttons.forEach(b=>b.classList.remove("held"));
+const pics=D.map((_,i)=>[false,true].map(f=>{
+ let im=new Image();im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(art(i,f));return im
+}));
+let pick=0;
+function choose(i){
+ pick=i;$("detail").textContent=D[i][0]+"｜"+D[i][7]+"・"+D[i][8];
+ [...$("cards").children].forEach((b,j)=>b.classList.toggle("sel",i===j))
 }
+D.forEach((d,i)=>{
+ let b=document.createElement("button");b.className="card";
+ b.innerHTML=art(i)+"<b>"+d[0]+"</b><span>"+d[7]+"</span>";
+ b.onclick=()=>choose(i);$("cards").append(b)
+});choose(0);
+
+const clamp=(x,a,b)=>Math.max(a,Math.min(x,b)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),home=t=>t?W-220:220;
+let units=[],towers=[],balls=[],shots=[],fx=[],me,state="menu",t=0,last=0,score,camX,camY,z,w,h;
+const keys=new Set(),held=new Map(),codes=["KeyJ","KeyQ","KeyE","KeyR","Space","KeyF"],
+ cost=[0,5,25,50,12,60],cd=[.28,.32,7,18,2.8,30];
+let joy=[0,0],pid=null;
+const reset=()=>{keys.clear();held.clear();pid=null;joy=[0,0];$("nub").style.transform=""};
+
 function start(){
- difficulty=Number($("difficulty").value);
- heroes=[];towers=[];cores=[];shots=[];fx=[];labels=[];
- time=0;hudTimer=0;kills=[0,0];ended=false;paused=false;
- resetInput();
- const roster=shuffle(DATA.map((_,i)=>i).filter(i=>i!==selected));
- const allies=[selected,...roster.slice(0,3)];
- const foes=roster.slice(3,7);
- for(let i=0;i<4;i++){
-  heroes.push(createHero(allies[i],0,i));
-  heroes.push(createHero(foes[i],1,i));
+ let pool=D.map((_,i)=>i).filter(i=>i!==pick);
+ for(let i=pool.length-1;i;i--){
+  let j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]
  }
- player=heroes[0];
- for(let team=0;team<2;team++){
-  cores.push({
-   kind:"core",team,x:baseX(team),y:H/2,
-   hp:6000,maxHp:6000,name:"龍珠",radius:48
-  });
-  for(let lane=0;lane<2;lane++){
-   for(let depth=0;depth<2;depth++){
-    const fraction=depth===0?.35:.20;
-    towers.push({
-     kind:"tower",team,lane,depth,
-     x:W*(team===0?fraction:1-fraction),y:LANES[lane],
-     hp:depth===0?1800:2300,maxHp:depth===0?1800:2300,
-     cd:0,name:depth===0?"外塔":"內塔",radius:37
-    });
-   }
-  }
+ pool.unshift(pick);
+ units=pool.slice(0,8).map((id,i)=>{
+  let team=i>>2,d=D[id],m=team?+$("diff").value:1;
+  return {id,team,x:home(team),y:H/2+(i%4-1.5)*70,lane:i%2,
+   hp:d[4]*m,max:d[4]*m,power:d[5]*m,speed:d[6],ki:100,lv:1,xp:0,
+   cd:Array(6).fill(0),a:team?Math.PI:0,form:0,shield:0,stun:0,inv:0,dead:0,pose:0,ko:0}
+ });
+ balls=[0,1].map(team=>({team,x:home(team),y:H/2,hp:6000,max:6000,ball:true}));towers=[];
+ for(let team of [0,1])for(let lane of [0,1])for(let depth of [0,1]){
+  let f=depth?.20:.35,max=depth?2300:1800;
+  towers.push({team,lane,depth,x:W*(team?1-f:f),y:H*(lane?.71:.29),hp:max,max,tower:true,wait:0})
  }
- camera.x=player.x;camera.y=player.y;
- running=true;
- $("menu").classList.add("hidden");
- $("result").classList.add("hidden");
- $("pause").textContent="暫停";
- say("長按普攻或氣功連發！先突破敵方任一路防線。",7);
- updateHUD();
+ shots=[];fx=[];score=[0,0];t=0;me=units[0];state="play";reset();
+ $("menu").hidden=true;$("ui").hidden=false;$("pause").textContent="暫停";
 }
 $("start").onclick=start;
-$("again").onclick=start;
-$("menuButton").onclick=()=>{
- running=false;paused=false;resetInput();
- $("menu").classList.remove("hidden");
- $("result").classList.add("hidden");
-};
+function menu(){state="menu";reset();$("menu").hidden=false;$("ui").hidden=true}
+$("back").onclick=menu;
 function pause(){
- if(!running||ended)return;
- paused=!paused;resetInput();
- $("pause").textContent=paused?"繼續":"暫停";
+ if(!["play","pause"].includes(state))return;
+ state=state==="play"?"pause":"play";reset();
+ $("pause").textContent=state==="play"?"暫停":"繼續"
 }
 $("pause").onclick=pause;
 
-/* ---------- 目標與戰鬥 ---------- */
-function openCore(team){
- return LANES.some((_,lane)=>
-  !towers.some(t=>t.team===team&&t.lane===lane&&t.hp>0));
+const open=team=>[0,1].some(l=>!towers.some(b=>b.team===team&&b.lane===l&&b.hp>0));
+const valid=o=>o.hp>0&&(o.ball?open(o.team):!o.tower||!o.depth||
+ !towers.some(b=>b.team===o.team&&b.lane===o.lane&&!b.depth&&b.hp>0));
+const foes=u=>[...units,...towers,...balls].filter(o=>u.team!==o.team&&valid(o));
+const near=(u,r)=>foes(u).filter(o=>dist(u,o)<r).sort((a,b)=>dist(u,a)-dist(u,b))[0];
+function gain(u,n){
+ if(u.id==null||u.lv>=10)return;u.xp+=n;
+ if(u.xp>=90*u.lv){u.xp-=90*u.lv++;u.max+=110;u.power+=5;if(u.hp>0)u.hp=Math.min(u.max,u.hp+230)}
 }
-function vulnerable(o){
- if(o.kind==="hero")return true;
- if(o.kind==="core")return openCore(o.team);
- return o.depth===0||!towers.some(t=>
-  t.team===o.team&&t.lane===o.lane&&t.depth===0&&t.hp>0);
+function hit(u,o,n){
+ if(state!=="play"||!valid(o)||o.inv>0)return 0;
+ let v=Math.min(o.hp,Math.round(n*(o.shield>0?.45:1)));o.hp-=v;
+ if(o.hp===0){
+  if(o.ball){state=u.team?"lose":"win";reset()}
+  else if(o.tower){units.filter(h=>h.team===u.team).forEach(h=>gain(h,85))}
+  else{o.dead=7+o.lv*.65;score[u.team]++;if(u.id!=null){u.ko++;gain(u,100)}}
+ }return v
 }
-function enemyTargets(h){
- return [...heroes,...towers,...cores].filter(o=>
-  o.team!==h.team&&alive(o)&&vulnerable(o));
+const ring=(x,y,r,c)=>fx.push({x,y,r,c,life:.45});
+function fire(u,a,p,r=8,c="#a8eaff",speed=820,range=670,pierce=false){
+ shots.push({u,x:u.x,y:u.y,a,p,r,c,speed,left:range,pierce,seen:new Set()})
 }
-function nearest(h,range){
- let best=null,bestD=range;
- for(const o of enemyTargets(h)){
-  const d=dist(h,o);
-  if(d<bestD){best=o;bestD=d}
- }
- return best;
-}
-function aim(h,range=650){
- const target=nearest(h,range);
- if(target)h.angle=Math.atan2(target.y-h.y,target.x-h.x);
- return target;
-}
-function xp(h,amount){
- if(!h||h.kind!=="hero")return;
- h.xp+=amount;
- while(h.level<10&&h.xp>=h.level*90){
-  h.xp-=h.level*90;h.level++;h.maxHp+=110;h.power+=5;
-  if(alive(h))h.hp=Math.min(h.maxHp,h.hp+230);
-  label(h.x,h.y-65,"Lv."+h.level+" 升級！","#ffe28c");
- }
- if(h.level>=10)h.xp=0;
-}
-function finish(winner){
- if(ended)return;
- ended=true;resetInput();
- $("result").classList.remove("hidden");
- $("resultTitle").textContent=winner===0?
-  "勝利！取得敵方龍珠！":"戰敗！我方龍珠被奪走！";
- $("resultText").textContent=
-  "龍珠耐久已被打完。\n\n"+
-  `時間：${Math.floor(time/60)} 分 ${Math.floor(time%60)} 秒\n`+
-  `隊伍擊倒：${kills[0]}：${kills[1]}\n`+
-  `你的角色：${player.name}／等級 ${player.level}\n`+
-  `個人戰績：${player.kills} 擊倒／${player.deaths} 次倒下`;
-}
-function hit(o,amount,source){
- if(!alive(o)||!vulnerable(o))return 0;
- if(o.kind==="hero"&&o.inv>0)return 0;
- if(o.shield>0)amount*=.45;
- const actual=Math.min(o.hp,Math.round(amount));
- o.hp=Math.max(0,o.hp-actual);
- label(o.x+random(-15,15),o.y-35,"-"+actual,
-  o.team===0?"#ffc2ce":"#ffe4a1");
- if(o.hp>0)return actual;
- ring(o.x,o.y,85,"#ffc36d",.65);
- if(o.kind==="hero"){
-  o.dead=7+o.level*.65;o.deaths++;kills[1-o.team]++;
-  if(source&&source.kind==="hero"){
-   source.kills++;xp(source,100);
-  }
- }else if(o.kind==="tower"){
-  heroes.filter(h=>h.team!==o.team).forEach(h=>xp(h,85));
-  say((o.team===0?"我方":"敵方")+
-   (o.lane===0?"上路":"下路")+o.name+"被摧毀！"+
-   (openCore(o.team)?"龍珠防護已解除！":""));
- }else{
-  finish(1-o.team);
- }
- return actual;
-}
-function shoot(h,angle,power,speed,life,r,color,pierce=false){
- shots.push({
-  x:h.x,y:h.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
-  power,life,r,color,pierce,team:h.team,source:h,hit:new Set()
- });
-}
-function aoe(h,x,y,r,power,stun=0){
- enemyTargets(h).forEach(o=>{
-  if(dist({x,y},o)<=r){
-   hit(o,power,h);
-   if(stun&&o.kind==="hero"&&alive(o)&&o.inv<=0)o.stun=stun;
-  }
- });
-}
-function heal(h,r,amount){
- heroes.filter(o=>o.team===h.team&&alive(o)&&dist(h,o)<=r)
- .forEach(o=>{
-  const n=Math.min(amount,o.maxHp-o.hp);o.hp+=n;
-  label(o.x,o.y-45,"+"+Math.round(n),"#9cffbd");
- });
-}
-function move(h,dx,dy,dt,speed=h.speed){
- const length=Math.hypot(dx,dy);
- if(length<.05||h.stun>0)return;
- const strength=Math.min(1,length);
- h.x=clamp(h.x+dx/length*speed*strength*dt,40,W-40);
- h.y=clamp(h.y+dy/length*speed*strength*dt,40,H-40);
- h.angle=Math.atan2(dy,dx);
-}
-function cast(h,a){
- if(!running||paused||ended||!alive(h)||h.stun>0)return;
- if(h.cd[a]>0||h.ki<costs[a])return;
- if(a==="ult"&&h.level<2)return;
- if(a==="form"&&(h.level<3||h.form>0))return;
- h.ki-=costs[a];h.cd[a]=cooldowns[a];
- const d=DATA[h.type],p=h.power*(h.form>0?1.4:1);
- let target;
- if(a==="attack"){
-  target=aim(h,350);h.attackAnim=.2;
-  line(h.x,h.y,h.x+Math.cos(h.angle)*65,
-   h.y+Math.sin(h.angle)*65,"#fff0c9",6);
-  if(target&&dist(h,target)<110){
-   hit(target,p*1.25,h);ring(target.x,target.y,28,"#ffdd95",.18);
-  }else shoot(h,h.angle,p,650,.54,7,"#ffe3a1");
- }
- if(a==="blast"){
-  aim(h,650);
-  shoot(h,h.angle,p*1.25,800,.85,12,
-   h.form>0?"#ffdc78":"#8ce5ff");
- }
- if(a==="dash"){
-  const ox=h.x,oy=h.y;
-  h.x=clamp(h.x+Math.cos(h.angle)*235,40,W-40);
-  h.y=clamp(h.y+Math.sin(h.angle)*235,40,H-40);
-  h.inv=.3;line(ox,oy,h.x,h.y,"#c3e8ff",12);
- }
- if(a==="form"){
-  h.form=13;
-  ring(h.x,h.y,110,"#ffe878",.8);
-  label(h.x,h.y-75,d.form,"#ffe878");
- }
- if(a==="skill"){
-  target=aim(h,440);
-  label(h.x,h.y-75,d.skill,"#d4ecff");
-  if(d.special==="rush"||d.special==="time"){
-   if(target){
-    const ox=h.x,oy=h.y;
-    h.x=clamp(target.x-Math.cos(h.angle)*65,40,W-40);
-    h.y=clamp(target.y-Math.sin(h.angle)*65,40,H-40);
-    line(ox,oy,h.x,h.y,"#e5d2ff",12);
-    hit(target,p*3.5,h);
-    if(d.special==="time"&&target.kind==="hero"&&target.inv<=0)
-     target.stun=1.4;
-   }else{
-    ring(h.x,h.y,70,"#ead3ff");
-   }
-  }
-  if(d.special==="shield"){
-   h.shield=5;ring(h.x,h.y,65,"#9cbcff",.6);
-  }
-  if(d.special==="heal"){
-   heal(h,280,330+h.level*20);
-   ring(h.x,h.y,280,"#9cffbc",.7);
-  }
-  if(d.special==="stun"){
-   aoe(h,h.x,h.y,255,p,1.7);
-   ring(h.x,h.y,255,"#fff4c4",.7);
-  }
-  if(d.special==="spin"){
-   aoe(h,h.x,h.y,200,p*3.5,.5);
-   ring(h.x,h.y,200,"#b4efaf",.5);
-  }
-  if(d.special==="snipe"){
-   shoot(h,h.angle,p*4.2,1150,.8,10,"#e7a6ff",true);
-   line(h.x,h.y,h.x+Math.cos(h.angle)*850,
-    h.y+Math.sin(h.angle)*850,"#e7a6ff",5);
-  }
-  if(d.special==="drain"){
-   let total=0;
-   enemyTargets(h).filter(o=>dist(h,o)<235).forEach(o=>{
-    total+=hit(o,p*2.5,h);
-   });
-   h.hp=Math.min(h.maxHp,h.hp+total*.65);
-   ring(h.x,h.y,235,"#abf197",.7);
-  }
-  if(d.special==="burst"){
-   aoe(h,h.x,h.y,255,p*3.6);
-   ring(h.x,h.y,255,"#d09cff",.6);
-  }
- }
- if(a==="ult"){
-  target=aim(h,780);
-  label(h.x,h.y-85,d.ult,"#f0d0ff");
-  if(d.ultimate==="bomb"){
-   const x=target?target.x:clamp(h.x+Math.cos(h.angle)*480,40,W-40);
-   const y=target?target.y:clamp(h.y+Math.sin(h.angle)*480,40,H-40);
-   fx.push({
-    type:"bomb",x,y,r:190,color:"#9ee7ff",
-    life:.85,max:.85,source:h,power:p*7
-   });
-  }
-  if(d.ultimate==="beam"||d.ultimate==="pierce"){
-   shoot(h,h.angle,p*7,1050,.95,
-    d.ultimate==="pierce"?19:34,"#dfbbff",true);
-   line(h.x,h.y,h.x+Math.cos(h.angle)*850,
-    h.y+Math.sin(h.angle)*850,"#e3baff",18);
-  }
-  if(d.ultimate==="discs"){
-   for(let i=-1;i<=1;i++)
-    shoot(h,h.angle+i*.14,p*3.8,750,1.3,20,"#ffe99b",true);
-  }
-  if(d.ultimate==="nova"){
-   aoe(h,h.x,h.y,380,p*6);
-   heal(h,380,250);
-   ring(h.x,h.y,380,"#ffc4e5",.8);
-  }
-  if(d.ultimate==="freeze"){
-   const x=target?target.x:h.x,y=target?target.y:h.y;
-   aoe(h,x,y,260,p*4.5,2.5);
-   ring(x,y,260,"#ccb6ff",.85);
-  }
- }
-}
+const sp=["rush","guard","heal","stun","rush","spin","snipe","drain","heal","spin","time","spin","guard","rush","heal","stone","rush","rush"];
+const ul=["bomb","beam","beam","disc","beam","bomb","bomb","beam","nova","bomb","freeze","bomb","beam","disc","beam","fan","bomb","fan"];
 
-/* ---------- AI 與更新 ---------- */
-function ai(h,dt){
- const nearby=nearest(h,720);
- const retreat=h.hp<h.maxHp*.22;
- let goal,stop=20;
- if(retreat){
-  goal={x:baseX(h.team),y:H/2};
- }else if(nearby){
-  goal=nearby;stop=nearby.kind==="hero"?230:290;
- }else{
-  const enemyCore=cores[1-h.team];
-  if(openCore(1-h.team)){
-   goal=enemyCore;stop=230;
-  }else{
-   const objectives=towers.filter(t=>
-    t.team!==h.team&&t.hp>0&&vulnerable(t));
-   objectives.sort((a,b)=>
-    (dist(h,a)+(a.lane===h.lane?0:900))-
-    (dist(h,b)+(b.lane===h.lane?0:900)));
-   goal=objectives[0];
-  }
- }
- if(goal){
-  if(dist(h,goal)>stop){
-   move(h,goal.x-h.x,goal.y-h.y,dt,h.speed);
-  }else h.angle=Math.atan2(goal.y-h.y,goal.x-h.x);
- }
- h.think-=dt;
- if(h.think>0)return;
- h.think=.16+Math.random()*.12;
- if(nearby&&!retreat){
-  const distance=dist(h,nearby),d=DATA[h.type];
-  if(distance<350)cast(h,"attack");
-  if(distance<650)cast(h,"blast");
-  const skillRange=["snipe","rush","time"].includes(d.special)?440:245;
-  if(distance<skillRange)cast(h,"skill");
-  if(distance<620&&h.ki>=60)cast(h,"ult");
-  if(h.level>=3&&h.ki>=85)cast(h,"form");
- }else if(retreat){
-  const s=DATA[h.type].special;
-  if(s==="heal"||s==="shield")cast(h,"skill");
- }
-}
-function heldActions(){
- const set=new Set(touchActions.values());
- for(const key in mapKeys)if(keys[key])set.add(mapKeys[key]);
- return set;
-}
-function segmentDistance(px,py,ax,ay,bx,by){
- const dx=bx-ax,dy=by-ay;
- const t=clamp(((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy||1),0,1);
- return Math.hypot(px-ax-dx*t,py-ay-dy*t);
-}
-function update(dt){
- time+=dt;
- for(const h of heroes){
-  for(const a in h.cd)h.cd[a]=Math.max(0,h.cd[a]-dt);
-  for(const k of ["shield","inv","stun","form","attackAnim"])
-   h[k]=Math.max(0,h[k]-dt);
-  if(h.dead>0){
-   h.dead=Math.max(0,h.dead-dt);
-   if(h.dead===0){
-    h.hp=h.maxHp;h.ki=100;h.x=baseX(h.team);
-    h.y=H/2+(h.index-1.5)*70;
-    h.inv=2;h.stun=0;h.form=0;
-    ring(h.x,h.y,75,"#c0eaff");
-   }
-   continue;
-  }
-  h.ki=Math.min(100,h.ki+13*dt);
-  h.passive+=dt;
-  if(h.passive>=5){h.passive-=5;xp(h,18)}
-  if(dist(h,cores[h.team])<260)
-   h.hp=Math.min(h.maxHp,h.hp+h.maxHp*.13*dt);
-  if(h===player){
-   let dx=joy.x,dy=joy.y;
-   if(keys.KeyA||keys.ArrowLeft)dx--;
-   if(keys.KeyD||keys.ArrowRight)dx++;
-   if(keys.KeyW||keys.ArrowUp)dy--;
-   if(keys.KeyS||keys.ArrowDown)dy++;
-   move(h,dx,dy,dt,h.speed*(h.form>0?1.18:1));
-   for(const a of heldActions())cast(h,a);
-  }else ai(h,dt);
-  if(ended)return;
- }
- for(const t of towers){
-  if(t.hp<=0)continue;
-  t.cd-=dt;
-  let target=null,best=490;
-  for(const h of heroes){
-   if(h.team===t.team||!alive(h))continue;
-   const d=dist(t,h);
-   if(d<best){best=d;target=h}
-  }
-  if(target&&t.cd<=0){
-   t.cd=1;
-   shoot(t,Math.atan2(target.y-t.y,target.x-t.x),
-    105,620,.9,12,t.team===0?BLUE:RED);
-  }
- }
- for(const s of shots){
-  const ox=s.x,oy=s.y;
-  s.life-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;
-  for(const o of enemyTargets(s)){
-   if(s.hit.has(o))continue;
-   if(segmentDistance(o.x,o.y,ox,oy,s.x,s.y)<s.r+(o.radius||23)){
-    hit(o,s.power,s.source);s.hit.add(o);
-    ring(s.x,s.y,25,s.color,.18);
-    if(!s.pierce){s.life=0;break}
-   }
-  }
-  if(ended)return;
- }
- shots=shots.filter(s=>s.life>0&&s.x>0&&s.x<W&&s.y>0&&s.y<H);
- const additions=[];
- for(const e of fx){
-  e.life-=dt;
-  if(e.type==="bomb"&&e.life<=0&&!e.done){
-   e.done=true;aoe(e.source,e.x,e.y,e.r,e.power);
-   additions.push({
-    type:"ring",x:e.x,y:e.y,r:e.r,
-    color:e.color,life:.6,max:.6
-   });
-  }
- }
- fx=fx.filter(e=>e.life>0).concat(additions);
- labels.forEach(t=>{t.life-=dt;t.y-=35*dt});
- labels=labels.filter(t=>t.life>0);
- camera.x+=(player.x-camera.x)*Math.min(1,dt*10);
- camera.y+=(player.y-camera.y)*Math.min(1,dt*10);
- const halfW=vw/zoom/2,halfH=vh/zoom/2;
- camera.x=clamp(camera.x,halfW,W-halfW);
- camera.y=clamp(camera.y,halfH,H-halfH);
- if(time>noticeEnd){
-  $("notice").textContent=openCore(1)?
-   "敵方龍珠防護解除！將耐久打至 0 即可獲勝。":
-   "先打通任一路：外塔 → 內塔 → 攻擊龍珠";
- }
- hudTimer+=dt;
- if(hudTimer>.1){hudTimer=0;updateHUD()}
-}
-function updateHUD(){
- if(!player)return;
- $("score").textContent=
-  `擊倒 ${kills[0]} : ${kills[1]} ｜ `+
-  `${Math.floor(time/60)}:${String(Math.floor(time%60)).padStart(2,"0")}`+
-  ` ｜ 龍珠 ${Math.ceil(cores[0].hp)} / ${Math.ceil(cores[1].hp)}`;
- $("status").textContent=player.dead>0?
-  `${Math.ceil(player.dead)} 秒後復活`:
-  `${player.name} Lv.${player.level}　HP ${Math.ceil(player.hp)}/${player.maxHp}`+
-  `　氣 ${Math.floor(player.ki)}`+
-  (player.form>0?`　強化 ${Math.ceil(player.form)}秒`:"");
- const d=DATA[player.type];
- const names={
-  attack:"普攻・長按",blast:"氣功・長按",
-  dash:"衝刺",skill:d.skill,ult:d.ult,form:d.form
+function cast(u,k){
+ if(state!=="play"||u.hp<=0||u.stun>0||u.cd[k]>0||u.ki<cost[k]||
+    (k===3&&u.lv<2)||(k===5&&u.lv<3))return;
+ u.cd[k]=cd[k];u.ki-=cost[k];
+ let o=k===4?null:near(u,[350,650,440,780,0,0][k]),p=u.power*(u.form>0?1.4:1);
+ if(o)u.a=Math.atan2(o.y-u.y,o.x-u.x);
+ const zone=(x,y,r,n,st=0)=>{
+  let total=0;ring(x,y,r,"#ffda89");
+  for(let v of foes(u))if(dist({x,y},v)<r){
+   let dmg=hit(u,v,n);total+=dmg;if(dmg&&v.id!=null)v.stun=Math.max(st,v.stun)
+  }return total
  };
- const held=heldActions();
- buttons.forEach(b=>{
-  const a=b.dataset.action;
-  let sub=player.cd[a]>.05?player.cd[a].toFixed(1)+"秒":costs[a]+"氣";
-  if(a==="ult"&&player.level<2)sub="等級2解鎖";
-  if(a==="form"&&player.level<3)sub="等級3解鎖";
-  b.innerHTML=names[a]+"<br>"+sub;
-  b.classList.toggle("cool",player.cd[a]>.05||player.ki<costs[a]);
-  b.classList.toggle("held",held.has(a));
- });
-}
-
-/* ---------- 畫面 ---------- */
-function circle(x,y,r,fill,stroke){
- ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
- if(fill){ctx.fillStyle=fill;ctx.fill()}
- if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}
-}
-function text(s,x,y,size=17,color="#fff"){
- ctx.font=`bold ${size}px system-ui`;
- ctx.textAlign="center";ctx.fillStyle=color;ctx.fillText(s,x,y);
-}
-function bar(x,y,w,h,ratio,color){
- ctx.fillStyle="#07101de8";ctx.fillRect(x,y,w,h);
- ctx.fillStyle=color;ctx.fillRect(x,y,w*clamp(ratio,0,1),h);
-}
-function visible(x,y,r=150){
- return Math.abs(x-camera.x)<vw/zoom/2+r&&
-  Math.abs(y-camera.y)<vh/zoom/2+r;
-}
-function mapDraw(){
- ctx.fillStyle="#183d3b";ctx.fillRect(0,0,W,H);
- const left=Math.max(0,camera.x-vw/zoom/2);
- const top=Math.max(0,camera.y-vh/zoom/2);
- ctx.strokeStyle="#ffffff06";ctx.lineWidth=1;
- for(let x=Math.floor(left/150)*150;x<Math.min(W,left+vw/zoom+150);x+=150){
-  ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,top+vh/zoom);ctx.stroke();
+ const mend=r=>units.filter(v=>v.hp>0&&v.team===u.team&&dist(u,v)<r)
+  .forEach(v=>v.hp=Math.min(v.max,v.hp+330));
+ if(k===0){
+  u.pose=.18;
+  if(o&&dist(u,o)<110){hit(u,o,p*1.25);ring(o.x,o.y,34,"#fff2bc")}
+  else fire(u,u.a,p,7,"#ffdc8e",680,350)
  }
- for(let y=Math.floor(top/150)*150;y<Math.min(H,top+vh/zoom+150);y+=150){
-  ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(left+vw/zoom,y);ctx.stroke();
+ if(k===1)fire(u,u.a,p*1.25,12);
+ if(k===4){
+  u.x=clamp(u.x+235*Math.cos(u.a),40,W-40);u.y=clamp(u.y+235*Math.sin(u.a),40,H-40);
+  u.inv=.3;ring(u.x,u.y,45,C[u.team])
  }
- ctx.lineCap="round";ctx.lineWidth=190;ctx.strokeStyle="#657e70";
- for(const y of LANES){
-  ctx.beginPath();ctx.moveTo(220,H/2);
-  ctx.lineTo(W*.2,y);ctx.lineTo(W*.8,y);
-  ctx.lineTo(W-220,H/2);ctx.stroke();
- }
- ctx.fillStyle="#23576a";ctx.fillRect(W/2-90,0,180,H);
- ctx.fillStyle="#87988a";
- LANES.forEach(y=>ctx.fillRect(W/2-110,y-110,220,220));
- for(let i=0;i<36;i++){
-  const x=450+(i*431)%(W-900);
-  const y=180+(i*719)%(H-360);
-  if(LANES.some(l=>Math.abs(l-y)<150)||!visible(x,y))continue;
-  circle(x+10,y+10,47,"#071d2655");
-  circle(x,y,43,"#2a514b","#42685c");
-  circle(x-10,y-12,23,"#3c6553");
- }
- ctx.lineWidth=6;ctx.strokeStyle="#709a8060";ctx.strokeRect(0,0,W,H);
-}
-function coreDraw(c){
- if(!visible(c.x,c.y))return;
- const col=c.team===0?BLUE:RED;
- circle(c.x,c.y,260,c.team===0?"#539bde14":"#dc668018",col);
- const free=openCore(c.team);
- if(!free){
-  ctx.lineWidth=3;circle(c.x,c.y,78,"#bbd8ff15","#c0d8ff");
- }
- circle(c.x,c.y,48,"#f2a42e","#ffe6a0");
- circle(c.x-12,c.y-15,12,"#ffe397");
- text("★",c.x,c.y+15,38,"#bc4318");
- bar(c.x-90,c.y-95,180,12,c.hp/c.maxHp,col);
- text(`龍珠 ${Math.ceil(c.hp)} / ${c.maxHp}`,c.x,c.y-110,19,col);
- text(free?"可攻擊":"防護中",c.x,c.y+95,20,free?"#ffda87":"#c6def7");
-}
-function towerDraw(t){
- if(!visible(t.x,t.y,510))return;
- if(t.hp<=0){
-  circle(t.x,t.y,35,"#1e3330");
-  text("×",t.x,t.y+10,32,"#81958a");return;
- }
- const col=t.team===0?BLUE:RED;
- ctx.lineWidth=1;
- circle(t.x,t.y,490,null,t.team===0?"#73cfff14":"#ff829514");
- circle(t.x,t.y+20,40,"#0005");
- ctx.fillStyle=t.team===0?"#3e789b":"#975266";
- ctx.fillRect(t.x-28,t.y-30,56,65);
- ctx.fillStyle=col;ctx.fillRect(t.x-36,t.y-40,72,20);
- circle(t.x,t.y-20,15,"#e8f6ff");
- if(!vulnerable(t))circle(t.x,t.y,55,null,"#c6d9fb");
- bar(t.x-47,t.y-73,94,9,t.hp/t.maxHp,col);
- text(t.name,t.x,t.y+64,18,col);
-}
-function heroDraw(h){
- if(!alive(h)||!visible(h.x,h.y))return;
- const d=DATA[h.type],col=h.team===0?BLUE:RED;
- ctx.save();ctx.translate(h.x,h.y);
- if(h.inv>0)ctx.globalAlpha=.55+.25*Math.sin(time*25);
- circle(0,21,26,"#0005");
- if(h.form>0){
-  ctx.lineWidth=3;
-  circle(0,0,43+Math.sin(time*14)*5,"#ffdc4920","#ffe18b");
- }
- if(h.shield>0)circle(0,0,45,"#a1beff20","#acc9ff");
- ctx.lineWidth=3;circle(0,0,h===player?33:28,null,h===player?"#fff1ab":col);
- ctx.rotate(h.angle+Math.PI/2);
- ctx.fillStyle=h.form>0&&h.type===6?"#e7bd49":d.color;
- ctx.fillRect(-15,-5,30,30);
- ctx.fillStyle="#233957";
- ctx.fillRect(-15,20,11,14);ctx.fillRect(4,20,11,14);
- ctx.fillStyle=d.skin;
- const punch=h.attackAnim>0?18:0;
- ctx.fillRect(-24,-4,9,24);
- ctx.fillRect(15,-4-punch,9,24);
- circle(0,-17,14,d.skin);
- if(d.hair==="spike"||d.hair==="horn"){
-  ctx.fillStyle=h.form>0?(h.type===4?"#e9e9ff":"#ffe56d"):
-   (d.hair==="horn"?"#396944":"#182131");
-  ctx.beginPath();ctx.moveTo(-14,-14);
-  ctx.lineTo(-20,-39);ctx.lineTo(-6,-30);
-  ctx.lineTo(0,-46);ctx.lineTo(7,-29);
-  ctx.lineTo(20,-39);ctx.lineTo(14,-14);ctx.fill();
- }
- if(d.hair==="short"){
-  ctx.fillStyle=h.form>0?"#ffe56d":"#b6a8e3";
-  ctx.fillRect(-15,-32,30,15);
- }
- if(d.hair==="ears"){
-  ctx.fillStyle=d.skin;
-  ctx.beginPath();ctx.moveTo(-12,-24);ctx.lineTo(-15,-57);
-  ctx.lineTo(-2,-28);ctx.fill();
-  ctx.beginPath();ctx.moveTo(12,-24);ctx.lineTo(15,-57);
-  ctx.lineTo(2,-28);ctx.fill();
- }
- ctx.restore();
- bar(h.x-36,h.y-58,72,8,h.hp/h.maxHp,col);
- text((h===player?"你・":"")+h.name+" Lv."+h.level,
-  h.x,h.y-70,16,h===player?"#fff1b7":"#eaf4ff");
- if(h.stun>0)text("暈眩",h.x,h.y-93,17,"#ffe19a");
-}
-function miniMap(){
- const width=vw<650?140:180,height=width*H/W;
- const x=vw-width-12,y=12;
- ctx.fillStyle="#061323e8";ctx.fillRect(x-5,y-5,width+10,height+10);
- ctx.fillStyle="#244a48";ctx.fillRect(x,y,width,height);
- const mx=v=>x+v/W*width,my=v=>y+v/H*height;
- ctx.strokeStyle="#7c8e76";ctx.lineWidth=2;
- LANES.forEach(l=>{
-  ctx.beginPath();ctx.moveTo(mx(220),my(H/2));
-  ctx.lineTo(mx(W*.2),my(l));ctx.lineTo(mx(W*.8),my(l));
-  ctx.lineTo(mx(W-220),my(H/2));ctx.stroke();
- });
- for(const t of towers){
-  if(t.hp>0){
-   ctx.fillStyle=t.team===0?BLUE:RED;
-   ctx.fillRect(mx(t.x)-2,my(t.y)-2,4,4);
+ if(k===5){u.form=13;ring(u.x,u.y,100,"#ffde77")}
+ if(k===2){
+  let s=sp[u.id];
+  if(s==="guard")u.shield=5;
+  else if(s==="heal"){mend(280);ring(u.x,u.y,280,"#99f0ae")}
+  else if(s==="snipe")fire(u,u.a,4.2*p,10,"#e79aff",1050,900,true);
+  else if(s==="rush"||s==="time"){
+   if(o){
+    u.x=clamp(o.x-65*Math.cos(u.a),40,W-40);u.y=clamp(o.y-65*Math.sin(u.a),40,H-40);
+    u.pose=.35;if(hit(u,o,p*3.5)&&s==="time"&&o.id!=null)o.stun=1.4
+   }ring(u.x,u.y,85,"#edd8ff")
+  }else{
+   let v=zone(u.x,u.y,250,p*(s==="stun"?1:3),["stone","stun"].includes(s)?1.8:0);
+   if(s==="drain")u.hp=Math.min(u.max,u.hp+.65*v)
   }
  }
- cores.forEach(c=>circle(mx(c.x),my(c.y),4,"#ffc15b"));
- heroes.filter(alive).forEach(h=>
-  circle(mx(h.x),my(h.y),h===player?4:2.5,
-   h===player?"#fff":h.team===0?BLUE:RED));
- ctx.strokeStyle="#ffffff80";ctx.lineWidth=1;
- const halfW=vw/zoom/2,halfH=vh/zoom/2;
- ctx.strokeRect(mx(camera.x-halfW),my(camera.y-halfH),
-  vw/zoom/W*width,vh/zoom/H*height);
-}
-function draw(){
- ctx.setTransform(dpr,0,0,dpr,0,0);
- ctx.fillStyle="#081320";ctx.fillRect(0,0,vw,vh);
- ctx.save();
- ctx.translate(vw/2,vh/2);ctx.scale(zoom,zoom);
- ctx.translate(-camera.x,-camera.y);
- mapDraw();cores.forEach(coreDraw);towers.forEach(towerDraw);
- heroes.slice().sort((a,b)=>a.y-b.y).forEach(heroDraw);
- for(const s of shots){
-  if(!visible(s.x,s.y,40))continue;
-  ctx.shadowColor=s.color;ctx.shadowBlur=10;
-  circle(s.x,s.y,s.r,s.color);ctx.shadowBlur=0;
-  circle(s.x,s.y,s.r*.4,"#fff");
- }
- for(const e of fx){
-  if(!visible(e.x,e.y,e.r||1000))continue;
-  const p=1-e.life/e.max;ctx.save();
-  if(e.type==="ring"){
-   ctx.globalAlpha=1-p;ctx.lineWidth=5;
-   circle(e.x,e.y,e.r*(.2+.8*p),null,e.color);
-  }
-  if(e.type==="line"){
-   ctx.globalAlpha=1-p;ctx.lineWidth=e.width;ctx.strokeStyle=e.color;
-   ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.tx,e.ty);ctx.stroke();
-  }
-  if(e.type==="bomb"){
-   circle(e.x,e.y,e.r,"#9ee7ff20","#a5e8ff");
-   circle(e.x,e.y-140*(1-p),30+p*40,"#b3efff","#fff");
-   text("即將爆發",e.x,e.y+e.r+25,19,"#d7f6ff");
-  }
-  ctx.restore();
- }
- for(const l of labels){
-  if(!visible(l.x,l.y))continue;
-  ctx.globalAlpha=clamp(l.life,0,1);
-  text(l.s,l.x,l.y,20,l.color);
- }
- ctx.globalAlpha=1;ctx.restore();
- if(running)miniMap();
- if(paused){
-  ctx.fillStyle="#06101dbb";ctx.fillRect(0,0,vw,vh);
-  text("已暫停",vw/2,vh/2,32);
-  text("按 P 或「繼續」返回",vw/2,vh/2+40,16,"#cadcf0");
+ if(k===3){
+  let s=ul[u.id],x=o?.x??u.x+440*Math.cos(u.a),y=o?.y??u.y+440*Math.sin(u.a);
+  if(s==="bomb")fx.push({x,y,r:190,c:"#93e2ff",life:.85,bomb:true,u,p:7*p});
+  if(s==="beam")fire(u,u.a,7*p,26,"#dbb6ff",1050,950,true);
+  if(s==="disc"||s==="fan")for(let j=-1;j<=1;j++)
+   fire(u,u.a+j*.16,3.8*p,16,s==="disc"?"#ffe478":"#ffad81",800,950,true);
+  if(s==="nova"){zone(u.x,u.y,380,p*6);mend(380)}
+  if(s==="freeze")zone(x,y,260,p*4.5,2.5)
  }
 }
 
-/* ---------- 輸入：長按不因冷卻中斷 ---------- */
-window.addEventListener("keydown",e=>{
- if(e.target.tagName==="SELECT")return;
- if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))
-  e.preventDefault();
- if(e.code==="KeyP"&&!e.repeat){pause();return}
- if(!running||paused||ended)return;
- keys[e.code]=true;
- if(mapKeys[e.code]&&!e.repeat)cast(player,mapKeys[e.code]);
-});
-window.addEventListener("keyup",e=>{keys[e.code]=false});
-window.addEventListener("blur",()=>{
- resetInput();if(running&&!paused&&!ended)pause();
-});
-document.addEventListener("visibilitychange",()=>{
- if(document.hidden){
-  resetInput();if(running&&!paused&&!ended)pause();
- }
-});
-buttons.forEach(b=>{
- b.addEventListener("pointerdown",e=>{
-  e.preventDefault();
-  if(!running||paused||ended)return;
-  b.setPointerCapture(e.pointerId);
-  touchActions.set(e.pointerId,b.dataset.action);
-  cast(player,b.dataset.action);
- });
- ["pointerup","pointercancel","lostpointercapture"].forEach(event=>{
-  b.addEventListener(event,e=>touchActions.delete(e.pointerId));
- });
- b.addEventListener("contextmenu",e=>e.preventDefault());
-});
-function stickMove(e){
- const r=$("stick").getBoundingClientRect(),max=r.width*.32;
- let dx=e.clientX-r.left-r.width/2;
- let dy=e.clientY-r.top-r.height/2;
- const length=Math.hypot(dx,dy);
- if(length>max){dx=dx/length*max;dy=dy/length*max}
- joy={x:dx/max,y:dy/max};
- $("knob").style.transform=`translate(${dx}px,${dy}px)`;
-}
-$("stick").addEventListener("pointerdown",e=>{
- e.preventDefault();
- if(stickId!==null||!running||paused||ended)return;
- stickId=e.pointerId;
- $("stick").setPointerCapture(e.pointerId);stickMove(e);
-});
-$("stick").addEventListener("pointermove",e=>{
- if(e.pointerId===stickId)stickMove(e);
-});
-["pointerup","pointercancel","lostpointercapture"].forEach(event=>{
- $("stick").addEventListener(event,e=>{
-  if(e.pointerId===stickId){
-   stickId=null;joy={x:0,y:0};
-   $("knob").style.transform="translate(0,0)";
+// 戰鬥更新
+function step(dt){
+ t+=dt;
+ for(let u of units){
+  if(state!=="play")return;
+  u.cd=u.cd.map(n=>Math.max(0,n-dt));
+  for(let s of ["inv","form","stun","shield","pose"])u[s]=Math.max(0,u[s]-dt);
+  if(u.hp<=0){
+   if((u.dead-=dt)<=0){
+    u.x=home(u.team);u.y=H/2;u.hp=u.max;u.ki=100;u.inv=2;u.stun=u.form=0
+   }continue
   }
- });
-});
-canvas.addEventListener("contextmenu",e=>e.preventDefault());
+  gain(u,3.6*dt);u.ki=Math.min(100,u.ki+13*dt);
+  if(dist(u,balls[u.team])<260)u.hp=Math.min(u.max,u.hp+u.max*.13*dt);
+  if(u.stun>0)continue;
+  let dx=0,dy=0,act=[];
+  if(u===me){
+   dx=joy[0]+Number(keys.has("KeyD")||keys.has("ArrowRight"))-Number(keys.has("KeyA")||keys.has("ArrowLeft"));
+   dy=joy[1]+Number(keys.has("KeyS")||keys.has("ArrowDown"))-Number(keys.has("KeyW")||keys.has("ArrowUp"));
+   act=[0,1].filter(k=>keys.has(codes[k])||[...held.values()].includes(k))
+  }else{
+   let enemy=near(u,680),run=u.hp<u.max*.19;
+   let goal=run?balls[u.team]:enemy||(open(1-u.team)?balls[1-u.team]:
+    towers.find(o=>o.team!==u.team&&o.lane===u.lane&&valid(o)));
+   if(goal&&dist(u,goal)>(run?50:240)){
+    let n=dist(u,goal);dx=(goal.x-u.x)/n;dy=(goal.y-u.y)/n
+   }
+   if(enemy&&!run){
+    let n=dist(u,enemy);
+    if(u.lv>=3&&u.ki>88)act.push(5);
+    if(n<620)act.push(3);
+    if(n<245||(["snipe","rush","time"].includes(sp[u.id])&&n<430))act.push(2);
+    if(n<350)act.push(0);act.push(1)
+   }else if(run&&sp[u.id]==="heal")act.push(2)
+  }
+  let len=Math.hypot(dx,dy);
+  if(len>.05){
+   u.a=Math.atan2(dy,dx);let d=u.speed*(u.form>0?1.18:1)*dt/Math.max(1,len);
+   u.x=clamp(u.x+dx*d,40,W-40);u.y=clamp(u.y+dy*d,40,H-40)
+  }
+  for(let k of act)cast(u,k)
+ }
+ for(let b of towers)if(b.hp>0&&(b.wait-=dt)<=0){
+  let o=units.filter(v=>v.team!==b.team&&v.hp>0&&dist(b,v)<490)
+   .sort((a,c)=>dist(b,a)-dist(b,c))[0];
+  if(o){b.wait=1;fire(b,Math.atan2(o.y-b.y,o.x-b.x),105,12,C[b.team],620,550)}
+ }
+ for(let s of shots){
+  let d=Math.min(s.left,s.speed*dt);
+  s.x+=Math.cos(s.a)*d;s.y+=Math.sin(s.a)*d;s.left-=d;
+  for(let o of foes(s.u)){
+   if(!s.seen.has(o)&&dist(s,o)<s.r+(o.ball?48:o.tower?36:23)){
+    hit(s.u,o,s.p);s.seen.add(o);if(!s.pierce){s.left=0;break}
+   }
+  }
+ }
+ shots=shots.filter(s=>s.left>0);
+ for(let f of fx){
+  f.life-=dt;
+  if(f.bomb&&f.life<=0){
+   for(let o of foes(f.u))if(dist(o,f)<f.r)hit(f.u,o,f.p);
+   ring(f.x,f.y,f.r,"#fff3bb")
+  }
+ }fx=fx.filter(f=>f.life>0);
+}
 
+const dot=(x,y,r,c)=>{
+ g.beginPath();g.arc(x,y,r,0,7);g.fillStyle=c;g.fill()
+};
+const txt=(s,x,y,size,c)=>{
+ g.fillStyle=c;g.font="bold "+size+"px system-ui";g.textAlign="center";g.fillText(s,x,y)
+};
 function frame(now){
- const dt=last?Math.min((now-last)/1000,.033):0;
- last=now;
- if(running&&!paused&&!ended)update(dt);
- draw();requestAnimationFrame(frame);
+ requestAnimationFrame(frame);let dt=Math.min(.033,(now-last)/1000);last=now;
+ if(state==="menu")return;if(state==="play")step(dt);
+ let cv=$("field"),d=Math.min(2,devicePixelRatio||1);
+ w=cv.clientWidth;h=cv.clientHeight;
+ if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){
+  cv.width=Math.round(w*d);cv.height=Math.round(h*d)
+ }
+ z=Math.max(.45,Math.min(1,w/1050,h/680));
+ camX=clamp(me.x,w/2/z,W-w/2/z);camY=clamp(me.y,h/2/z,H-h/2/z);
+ g.setTransform(d,0,0,d,0,0);g.fillStyle="#315c56";g.fillRect(0,0,w,h);
+ g.save();g.translate(w/2-camX*z,h/2-camY*z);g.scale(z,z);
+ g.fillStyle="#37778b";g.fillRect(W/2-92,0,184,H);
+ for(let l of [.29,.71]){
+  g.beginPath();g.moveTo(220,H/2);g.lineTo(W*.2,H*l);g.lineTo(W*.8,H*l);
+  g.lineTo(W-220,H/2);g.strokeStyle="#859580";g.lineWidth=175;g.stroke()
+ }
+ for(let j=0;j<75;j++){
+  let x=(450+j*431)%W,y=(180+j*719)%H;
+  if(Math.min(Math.abs(y-.29*H),Math.abs(y-.71*H))>130){
+   dot(x,y,33,"#244c49");dot(x-6,y-6,23,"#48735c")
+  }
+ }
+ for(let o of [...balls,...towers,...units].sort((a,b)=>a.y-b.y)){
+  if(o.hp<=0||Math.abs(o.x-camX)>w/2/z+110||Math.abs(o.y-camY)>h/2/z+120)continue;
+  let x=o.x,y=o.y,c=C[o.team],name;
+  if(o.id!=null){
+   let big=[8,9,16].includes(o.id)?1.18:o.id===3?.87:1;
+   let im=pics[o.id][Number(o.form>0)];
+   g.save();g.translate(x,y);g.scale(Math.cos(o.a)<0?-1:1,1);
+   g.beginPath();g.ellipse(0,17,34,11,0,0,7);g.fillStyle=o===me?"#ffe68a":c;g.fill();
+   if(o.shield||o.form||o.inv)dot(0,-13,46,o.shield?"#87caff55":"#ffdb6650");
+   g.rotate(o.pose>0?.14:0);
+   if(im.complete&&im.naturalWidth)g.drawImage(im,-44*big,-76*big,88*big,99*big);
+   g.restore();name=(o===me?"你・":"")+D[o.id][0]+" "+o.lv
+  }else if(o.ball){
+   dot(x,y,48,"#ffb336");txt("★",x,y+12,33,"#be4d13");
+   name=valid(o)?"龍珠 "+o.hp:"龍珠・防護中"
+  }else{
+   g.fillStyle=c;g.fillRect(x-29,y-30,58,64);dot(x,y-28,22,"#ebecdf");
+   name=(o.depth?"內塔":"外塔")+(valid(o)?"":"・防護中")
+  }
+  g.fillStyle="#142434";g.fillRect(x-32,y-91,64,6);
+  g.fillStyle=c;g.fillRect(x-32,y-91,64*o.hp/o.max,6);txt(name,x,y-97,16,"#fff6df")
+ }
+ for(let s of shots){dot(s.x,s.y,s.r,s.c);dot(s.x,s.y,s.r*.45,"#fff")}
+ for(let f of fx){
+  g.beginPath();g.arc(f.x,f.y,f.r*(f.bomb?1:Math.max(.1,1-f.life/.45)),0,7);
+  g.strokeStyle=f.c;g.lineWidth=4;g.stroke();if(f.bomb)dot(f.x,f.y-f.life*90,27,f.c)
+ }g.restore();
+
+ // 小地圖與狀態列
+ let mw=Math.min(160,w*.26),mh=mw*H/W,mx=w-mw-8;
+ g.fillStyle="#101e2cea";g.fillRect(mx,8,mw,mh);
+ for(let l of [.29,.71]){g.fillStyle="#576859";g.fillRect(mx,8+mh*l,mw,2)}
+ for(let o of [...balls,...towers,...units])if(o.hp>0)
+  dot(mx+o.x/W*mw,8+o.y/H*mh,o===me?4:o.ball?3:2,o===me?"white":o.ball?"orange":C[o.team]);
+ $("hud").textContent=D[me.id][0]+" Lv."+me.lv+"｜"+
+  (me.dead>0?"復活 "+Math.ceil(me.dead):"HP "+Math.ceil(me.hp)+"　氣 "+Math.floor(me.ki))+
+  "｜擊倒 "+score.join(":")+"｜龍珠 "+balls.map(b=>b.hp).join(":");
+ [...$("acts").children].forEach((b,k)=>{
+  let name=["普攻 J","氣功 Q",D[me.id][7],D[me.id][8],"衝刺",D[me.id][9]][k],n=me.cd[k];
+  b.textContent=name+(k===3&&me.lv<2?" Lv.2":k===5&&me.lv<3?" Lv.3":n>=1?" "+Math.ceil(n)+"秒":"");
+  b.classList.toggle("down",held.has(b._pid)||keys.has(codes[k]))
+ });
+ if(state!=="play"){
+  g.fillStyle="#0c172bd9";g.fillRect(0,h*.35,w,h*.28);
+  txt(state==="pause"?"已暫停":state==="win"?"勝利！你的小隊取得龍珠":"敗北！敵隊取得龍珠",w/2,h*.49,24,"#ffe09a");
+  txt(state==="pause"?"按 P 或點繼續":"點左上「選角」再戰",w/2,h*.55,15,"white")
+ }
 }
+
+// 鍵盤與多指觸控
+function down(k){if(state==="play")cast(me,k)}
+codes.forEach((_,k)=>{
+ let b=document.createElement("button");$("acts").append(b);
+ b.onpointerdown=e=>{
+  e.preventDefault();if(state!=="play")return;
+  b.setPointerCapture(e.pointerId);b._pid=e.pointerId;held.set(e.pointerId,k);down(k)
+ };
+ b.onpointerup=b.onpointercancel=b.onlostpointercapture=e=>held.delete(e.pointerId)
+});
+onkeydown=e=>{
+ if(state==="menu")return;
+ if(e.code==="KeyP"&&!e.repeat){pause();return}
+ if(state!=="play")return;
+ if(codes.includes(e.code)||e.code.startsWith("Arrow"))e.preventDefault();
+ keys.add(e.code);let k=codes.indexOf(e.code);if(k>=0&&!e.repeat)down(k)
+};
+onkeyup=e=>keys.delete(e.code);
+const pad=$("pad");
+function stick(e){
+ let b=pad.getBoundingClientRect(),x=e.clientX-b.left-b.width/2,y=e.clientY-b.top-b.height/2;
+ let n=Math.max(32,Math.hypot(x,y));joy=[x/n,y/n];
+ $("nub").style.transform="translate("+32*joy[0]+"px,"+32*joy[1]+"px)"
+}
+pad.onpointerdown=e=>{
+ if(pid!=null||state!=="play")return;
+ pid=e.pointerId;pad.setPointerCapture(pid);stick(e)
+};
+pad.onpointermove=e=>{if(e.pointerId===pid)stick(e)};
+pad.onpointerup=pad.onpointercancel=pad.onlostpointercapture=e=>{
+ if(pid===e.pointerId){pid=null;joy=[0,0];$("nub").style.transform=""}
+};
+onblur=()=>{if(state==="play")pause()};
+document.onvisibilitychange=()=>{if(document.hidden&&state==="play")pause()};
 requestAnimationFrame(frame);
-</script>
-</body>
-</html>
+</script></html>
