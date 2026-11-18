@@ -1,28 +1,156 @@
 <!doctype html>
-<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>龍珠小隊戰場 III</title>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>龍珠小隊戰場 IV</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#101b29;color:#fff3d4;font:15px system-ui}canvas#field{position:fixed;inset:0;width:100%;height:100%;touch-action:none}button,select{font:inherit;color:inherit;background:#223349;border:1px solid #697b8d;border-radius:8px;padding:8px;touch-action:none}button{cursor:pointer;user-select:none;-webkit-user-select:none}.sheet{position:fixed;inset:0;overflow:auto;background:linear-gradient(135deg,#14243a,#0b131f);padding:clamp(14px,4vw,50px)}main{max-width:980px;margin:auto}h1{font-size:clamp(26px,5vw,50px);margin:.12em 0}small{color:#ffc660;letter-spacing:.14em}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:7px}.card{display:grid;justify-items:center;background:linear-gradient(150deg,#314458,#192639);padding:4px}.card.sel{border:2px solid #ffc660;background:#51412c}.card svg{height:75px}.card span{font-size:12px;color:#d4dfeb}.gold{background:#ffbd56;color:#241b0f;font-weight:bold}.launch{position:sticky;bottom:0;background:#152439;padding:9px;border-radius:9px;margin-top:12px}#bar,#pad,#acts{position:fixed}#bar{top:6px;left:8px;background:#112034e8;padding:5px;border-radius:8px;font-size:12px;max-width:68%}#pad{bottom:16px;left:18px;width:100px;height:100px;border:2px solid #a4c3cf80;border-radius:50%;background:#15273b88;touch-action:none;display:grid;place-items:center}#nub{background:#cbe5ed99;width:38px;height:38px;border-radius:50%;pointer-events:none}#acts{bottom:12px;right:10px;display:grid;grid-template-columns:repeat(3,minmax(45px,1fr));gap:4px}#acts button{font-size:12px;min-height:43px;background:#192e46ee}#acts button.down{background:#866022}[hidden]{display:none!important}p{line-height:1.6}
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101b29;color:#fff3d4;
+ font:15px system-ui
+}
+canvas#field{
+ position:fixed;inset:0;width:100%;height:100%;
+ touch-action:none
+}
+button,select{
+ font:inherit;color:inherit;background:#223349;
+ border:1px solid #697b8d;border-radius:8px;
+ padding:8px;touch-action:none
+}
+button{
+ cursor:pointer;user-select:none;
+ -webkit-user-select:none
+}
+.sheet{
+ position:fixed;inset:0;overflow:auto;
+ background:linear-gradient(135deg,#14243a,#0b131f);
+ padding:clamp(14px,4vw,50px)
+}
+main{max-width:980px;margin:auto}
+h1{font-size:clamp(26px,5vw,50px);margin:.12em 0}
+small{color:#ffc660;letter-spacing:.14em}
+.grid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+ gap:7px
+}
+.card{
+ display:grid;justify-items:center;
+ background:linear-gradient(150deg,#314458,#192639);
+ padding:4px
+}
+.card.sel{
+ border:2px solid #ffc660;background:#51412c
+}
+.card svg{height:92px}
+.card span{font-size:12px;color:#d4dfeb;min-height:32px}
+.gold{background:#ffbd56;color:#241b0f;font-weight:bold}
+.launch{
+ position:sticky;bottom:0;background:#152439;
+ padding:9px;border-radius:9px;margin-top:12px
+}
+#bar,#pad,#acts{position:fixed}
+#bar{
+ top:6px;left:8px;background:#112034e8;
+ padding:5px;border-radius:8px;font-size:12px;
+ max-width:calc(100% - 190px);line-height:1.65
+}
+#pad{
+ bottom:16px;left:18px;width:100px;height:100px;
+ border:2px solid #a4c3cf80;border-radius:50%;
+ background:#15273b88;touch-action:none;
+ display:grid;place-items:center
+}
+#nub{
+ background:#cbe5ed99;width:38px;height:38px;
+ border-radius:50%;pointer-events:none
+}
+#acts{
+ max-width:300px;bottom:12px;right:10px;
+ display:grid;grid-template-columns:repeat(3,minmax(45px,1fr));
+ gap:4px
+}
+#acts button{
+ font-size:12px;min-height:43px;background:#192e46ee
+}
+#acts button.down{background:#866022}
+#feed{
+ position:fixed;top:105px;left:10px;
+ background:#112034d9;padding:7px;border-radius:8px;
+ max-width:65%;pointer-events:none;font-size:12px
+}
+[hidden]{display:none!important}
+p{line-height:1.6}
+@media(max-width:600px){
+ #bar{max-width:65%;font-size:10px}
+ #acts{max-width:210px}
+ #acts button{font-size:10px;padding:6px}
+ #feed{top:120px;font-size:10px}
+ .grid{grid-template-columns:repeat(3,1fr)}
+}
 </style>
+</head>
+<body>
 <canvas id="field"></canvas>
+
 <div id="ui" hidden>
- <div id="bar"><span id="hud"></span> <button id="pause">暫停</button> <button id="back">選角</button></div>
- <div id="pad"><i id="nub"></i></div><div id="acts"></div>
+ <div id="bar">
+  <span id="hud"></span>
+  <button id="pause">暫停</button>
+  <button id="back">選角</button>
+ </div>
+ <div id="feed"></div>
+ <div id="pad"><i id="nub"></i></div>
+ <div id="acts"></div>
 </div>
-<section id="menu" class="sheet"><main>
- <small>英雄圖鑑　／　VOL. 03</small><h1>龍珠小隊戰場</h1>
- <p>選一位戰士，和三名隊友突破任一路外塔、內塔，再擊破敵方龍珠的 6,000 點耐久。</p>
+
+<section id="menu" class="sheet">
+<main>
+ <small>英雄圖鑑　／　VOL. 04</small>
+ <h1>龍珠小隊戰場</h1>
+ <p>
+  4 對 4・全王護送戰。上下路全王每 50 秒交換攻守；
+  全王到場才能攻擊破壞神。
+  突破任一路兩位破壞神，再擊破龍珠！
+ </p>
+ <p>
+  <input id="search" placeholder="搜尋角色…"
+   style="padding:10px;width:100%;max-width:400px">
+ </p>
  <div id="cards" class="grid"></div>
- <div class="launch"><b id="detail"></b>
-  <select id="diff"><option value=".8">練習</option><option selected value="1">普通</option><option value="1.2">困難</option></select>
+ <div class="launch">
+  <b id="detail"></b>
+  <select id="diff">
+   <option value=".8">練習</option>
+   <option selected value="1">普通</option>
+   <option value="1.2">困難</option>
+  </select>
   <button class="gold" id="start">出戰 →</button>
  </div>
- <p>WASD／方向鍵移動，長按 J 普攻、Q 氣功。E 特殊技、R 大絕、空白鍵衝刺、F 強化、P 暫停。iPad 可同時推搖桿與長按攻擊。大絕於 Lv.2、強化於 Lv.3 解鎖。</p>
-</main></section>
+ <p>
+  WASD／方向鍵移動，J 長按普攻。
+  Q／E／R 為技能1／2／3，T 大招，F 變身，空白鍵衝刺。
+  普攻類型每角固定，拳腳不會自動變氣彈。<br>
+  每親手擊倒兩隻小怪升一級：
+  Lv.2／3／4 解鎖技能，Lv.5 大招，Lv.7 變身。
+  之後逐級強化技能，最高 Lv.12。<br>
+  P 暫停；中央牆不可穿越，氣功也會被牆擋住。
+  數值與技能效果為自製設計，非官方版本。
+ </p>
+</main>
+</section>
+
 <script>
 "use strict";
-const $=s=>document.getElementById(s),g=$("field").getContext("2d"),
- W=1800*Math.sqrt(10),H=1000*Math.sqrt(10),C=["#68dbff","#ff788c"];
+
+/* ================= 基本設定 ================= */
+
+const $=s=>document.getElementById(s);
+const g=$("field").getContext("2d");
+const W=7200,H=4200;
+const C=["#68dbff","#ff788c"];
 
 // 名稱、衣色、膚色、髮色、生命、攻擊、速度、特殊技、大絕、強化
 const D=[
@@ -46,12 +174,17 @@ const D=[
 ["悟吉塔","#302e39","#efb58f","#f9d454",1440,51,355,"星塵突擊","星塵碎擊","超藍悟吉塔"]
 ];
 
-const path=(d,f)=>'<path d="'+d+'" fill="'+f+'"/>';
-const oval=(x,y,a,b,f)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+a+'" ry="'+b+'" fill="'+f+'"/>';
+/* ================= 角色繪圖 ================= */
 
-// 同一套向量圖用於角色卡及戰場，不需外部圖片。
+const path=(d,f)=>'<path d="'+d+'" fill="'+f+'"/>';
+const oval=(x,y,a,b,f)=>
+ '<ellipse cx="'+x+'" cy="'+y+'" rx="'+a+'" ry="'+b+'" fill="'+f+'"/>';
+
 function art(i,on=false){
- let [,s,k,h]=D[i],ink="#20202c",gold="#ffdd64",white="#fff2dc",p=path,e=oval;
+ let [,s,k,h]=D[i];
+ let ink="#20202c",gold="#ffdd64",white="#fff2dc";
+ let p=path,e=oval;
+
  if(on){
   if([0,1,5].includes(i))h=gold;
   if(i===4)h="#e9e7ff";
@@ -59,43 +192,128 @@ function art(i,on=false){
   if(i===17)h="#41caff";
   if(i===6)s=k="#e8bc48";
  }
+
  let a="",b="",head="",extra="";
- if([2,8,15].includes(i))
-  a+=p("M32 53Q50 43 67 53L84 96 59 87 43 100 17 96Z",i===2?"#eeeae0":i===8?"#775392":"#ede4d0");
- if([6,11,16].includes(i))
+
+ if([2,8,15].includes(i)){
+  a+=p(
+   "M32 53Q50 43 67 53L84 96 59 87 43 100 17 96Z",
+   i===2?"#eeeae0":i===8?"#775392":"#ede4d0"
+  );
+ }
+ if([6,11,16].includes(i)){
   a+=p("M55 82Q92 102 86 56Q99 102 73 101L48 93Z",k);
- if(i===5)
-  a+=p("M18 95L67 35 72 39 23 101Z","#c3d6df")+p("M61 40L77 48 80 44 64 35Z","#cda846");
- if(i===7)a+=p("M30 56L15 100 42 89 58 89 83 100 69 56Z","#27313a");
+ }
+ if(i===5){
+  a+=p("M18 95L67 35 72 39 23 101Z","#c3d6df");
+  a+=p("M61 40L77 48 80 44 64 35Z","#cda846");
+ }
+ if(i===7){
+  a+=p("M30 56L15 100 42 89 58 89 83 100 69 56Z","#27313a");
+ }
 
- let pants=[8,17].includes(i)?"#f8efdb":[0,3,4].includes(i)?s:"#344059";
- b+=p("M36 78L64 78 67 97 56 105 50 90 44 104 31 99Z",pants)
-   +p("M32 96L44 99 43 108 26 108Z M56 98L66 96 74 107 57 108Z","#27354c");
- b+=p("M32 51Q48 45 68 51L73 65 63 70 64 84Q49 90 34 83L35 68 26 64Z",s);
- if([0,3,4].includes(i))
-  b+=p("M36 51L50 67 61 51 54 50 49 58 43 50Z","#243b65")+e(59,63,4,4,"#fff4d5");
- if(i===1)b+=p("M32 52L38 50 41 58 58 58 61 50 67 52 63 72 38 72Z","#e8e9de")
-  +p("M39 69L62 69 59 79 41 79Z","#dab26b");
- if(i===2)b+=p("M26 53Q39 43 51 53Q63 43 73 54L60 65 49 59 36 65Z","#fcf7e7");
- if(i===8)b+=e(50,76,22,15,k)+p("M29 81Q50 90 71 81L67 90 34 90Z",gold);
- if(i===9)b+=p("M31 54Q50 45 68 53L64 76 50 81 35 75Z",k)
-  +p("M33 77L67 77 70 92 59 87 53 94 43 87 31 91Z","#8bb94b");
- if([10,14,15].includes(i))b+=p("M35 54L49 61 64 51 59 78 66 96 51 90 34 97 40 78Z",s);
- if(i===11)b+=p("M31 52Q50 64 69 52L62 66 50 72 37 65Z","#202938")+p("M49 60L56 66 50 72 44 66Z","#f6cb60");
+ let pants=[8,17].includes(i)?"#f8efdb":
+  [0,3,4].includes(i)?s:"#344059";
+
+ b+=p("M36 78L64 78 67 97 56 105 50 90 44 104 31 99Z",pants);
+ b+=p(
+  "M32 96L44 99 43 108 26 108Z M56 98L66 96 74 107 57 108Z",
+  "#27354c"
+ );
+ b+=p(
+  "M32 51Q48 45 68 51L73 65 63 70 64 84Q49 90 34 83L35 68 26 64Z",
+  s
+ );
+
+ if([0,3,4].includes(i)){
+  b+=p("M36 51L50 67 61 51 54 50 49 58 43 50Z","#243b65");
+  b+=e(59,63,4,4,"#fff4d5");
+ }
+ if(i===1){
+  b+=p(
+   "M32 52L38 50 41 58 58 58 61 50 67 52 63 72 38 72Z",
+   "#e8e9de"
+  );
+  b+=p("M39 69L62 69 59 79 41 79Z","#dab26b");
+ }
+ if(i===2){
+  b+=p(
+   "M26 53Q39 43 51 53Q63 43 73 54L60 65 49 59 36 65Z",
+   "#fcf7e7"
+  );
+ }
+ if(i===8){
+  b+=e(50,76,22,15,k);
+  b+=p("M29 81Q50 90 71 81L67 90 34 90Z",gold);
+ }
+ if(i===9){
+  b+=p("M31 54Q50 45 68 53L64 76 50 81 35 75Z",k);
+  b+=p(
+   "M33 77L67 77 70 92 59 87 53 94 43 87 31 91Z",
+   "#8bb94b"
+  );
+ }
+ if([10,14,15].includes(i)){
+  b+=p("M35 54L49 61 64 51 59 78 66 96 51 90 34 97 40 78Z",s);
+ }
+ if(i===11){
+  b+=p("M31 52Q50 64 69 52L62 66 50 72 37 65Z","#202938");
+  b+=p("M49 60L56 66 50 72 44 66Z","#f6cb60");
+ }
  if(i===12)b+=p("M31 52L65 52 48 64Z","#f18a39");
- if(i===13)b+=p("M36 52L43 53 45 77 56 77 57 52 64 52 66 81 35 81Z","#344d79");
- if(i===17)b+=p("M32 51Q38 45 46 51L42 68 34 60Z M55 51Q63 45 69 53L64 63 57 68Z","#f5bb46")
-  +p("M43 55L56 54 53 77 46 78Z",k);
- b+=p("M34 78Q49 82 65 78L64 84 35 85Z",i===14?"#e25650":i===8?gold:"#30486c");
- b+=p("M28 59Q19 66 22 77L30 79 38 66Z M68 58L78 63 84 58 90 64Q81 82 69 75L61 66Z",k);
- if(i===13)for(let j=0;j<3;j++)b+=p("M"+(24+j)+" "+(68+j*3)+"l8 3 1 -2 -8 -3Z",ink);
+ if(i===13){
+  b+=p(
+   "M36 52L43 53 45 77 56 77 57 52 64 52 66 81 35 81Z",
+   "#344d79"
+  );
+ }
+ if(i===17){
+  b+=p(
+   "M32 51Q38 45 46 51L42 68 34 60Z M55 51Q63 45 69 53L64 63 57 68Z",
+   "#f5bb46"
+  );
+  b+=p("M43 55L56 54 53 77 46 78Z",k);
+ }
 
- if([2,14,15].includes(i))head+=p("M34 34L19 27 31 45 39 45 M66 34L81 27 70 44 62 45",k);
- if(i===11)head+=p("M35 36Q23 1 30 3L46 27 M54 27L69 2Q77 2 65 38",k);
- head+=p("M31 32Q30 15 50 15Q70 15 69 34L66 45 54 54 46 54 34 44Z",k);
- head+=p("M35 33L47 37 45 41 36 39Z M53 37L65 33 63 39 55 41Z",i===11?gold:"#fff")
-  +p("M42 36L45 37 44 40 42 39Z M56 37L59 36 58 40 56 40Z",ink)
-  +p("M46 46Q51 48 56 45L51 48Z",ink);
+ b+=p(
+  "M34 78Q49 82 65 78L64 84 35 85Z",
+  i===14?"#e25650":i===8?gold:"#30486c"
+ );
+ b+=p(
+  "M28 59Q19 66 22 77L30 79 38 66Z M68 58L78 63 84 58 90 64Q81 82 69 75L61 66Z",
+  k
+ );
+
+ if(i===13){
+  for(let j=0;j<3;j++){
+   b+=p("M"+(24+j)+" "+(68+j*3)+"l8 3 1 -2 -8 -3Z",ink);
+  }
+ }
+
+ if([2,14,15].includes(i)){
+  head+=p(
+   "M34 34L19 27 31 45 39 45 M66 34L81 27 70 44 62 45",
+   k
+  );
+ }
+ if(i===11){
+  head+=p("M35 36Q23 1 30 3L46 27 M54 27L69 2Q77 2 65 38",k);
+ }
+
+ head+=p(
+  "M31 32Q30 15 50 15Q70 15 69 34L66 45 54 54 46 54 34 44Z",
+  k
+ );
+ head+=p(
+  "M35 33L47 37 45 41 36 39Z M53 37L65 33 63 39 55 41Z",
+  i===11?gold:"#fff"
+ );
+ head+=p(
+  "M42 36L45 37 44 40 42 39Z M56 37L59 36 58 40 56 40Z",
+  ink
+ );
+ head+=p("M46 46Q51 48 56 45L51 48Z",ink);
+
  if([0,1,4,9,17].includes(i)){
   const styles=[
    "M28 37L16 29 29 26 11 17 36 19 29 7 44 15 53 2 59 16 77 9 70 22 82 23 65 34 65 27 53 26 43 37 44 26 34 31Z",
@@ -104,324 +322,1582 @@ function art(i,on=false){
   ];
   head+=p(styles[i===1?1:i===4?2:0],h);
  }
- if([5,12,13].includes(i))
-  head+=p(i===13?"M29 47Q21 17 39 13Q68 3 72 31L71 54 61 47 62 22Q48 30 34 33L35 48Z":"M27 48Q21 12 43 12Q69 7 73 31L70 53 61 43 61 29 50 19 36 34 35 46Z",h);
- if(i===2)head+=p("M29 31Q27 12 42 15Q48 6 62 17L69 29 55 25 38 31Z","#f2eee0");
- if(i===3)for(let j=0;j<6;j++)head+=e(46+j%2*7,21+Math.floor(j/2)*4,1,1,"#77523e");
- if(i===6)head+=e(50,23,15,8,"#9855b3");
- if(i===7||i===16)head+=p("M28 37L22 8 43 18 52 23 71 4 75 30 65 38 61 29 39 29Z",i===7?"#79a855":"#e8e6ef");
- if(i===7)for(const [x,y] of [[31,21],[35,24],[64,21],[66,17],[39,58],[57,70]])extra+=e(x,y,2,2,ink);
- if(i===16)head+=p("M32 40L48 44 68 35 63 48 51 55 38 49Z","#e8e6ef");
- if(i===8)head+=p("M43 19Q43 3 59 7Q70 13 78 6Q76 20 59 16L54 23Z",k);
- if(i===10)head+=p("M47 16L51 15 52 31 49 34Z","#877491");
- if(i===14)head+=p("M28 31Q23 20 34 14L23 9 41 10 42 2 55 9 75 5 66 17 74 18 60 27 51 20 36 31Z",h)+e(70,44,3,5,gold);
- if(i===15)head+=p("M32 23L32 8 43 20Z M59 19L68 7 67 25Z",white)+p("M41 44L50 41 59 44 52 45 50 53 46 45Z",ink);
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112"><g stroke="#252237" stroke-width="1.4" stroke-linejoin="round">'+a+b+head+extra+'</g></svg>';
-}
-const pics=D.map((_,i)=>[false,true].map(f=>{
- let im=new Image();im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(art(i,f));return im
-}));
-let pick=0;
-function choose(i){
- pick=i;$("detail").textContent=D[i][0]+"｜"+D[i][7]+"・"+D[i][8];
- [...$("cards").children].forEach((b,j)=>b.classList.toggle("sel",i===j))
-}
-D.forEach((d,i)=>{
- let b=document.createElement("button");b.className="card";
- b.innerHTML=art(i)+"<b>"+d[0]+"</b><span>"+d[7]+"</span>";
- b.onclick=()=>choose(i);$("cards").append(b)
-});choose(0);
 
-const clamp=(x,a,b)=>Math.max(a,Math.min(x,b)),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),home=t=>t?W-220:220;
-let units=[],towers=[],balls=[],shots=[],fx=[],me,state="menu",t=0,last=0,score,camX,camY,z,w,h;
-const keys=new Set(),held=new Map(),codes=["KeyJ","KeyQ","KeyE","KeyR","Space","KeyF"],
- cost=[0,5,25,50,12,60],cd=[.28,.32,7,18,2.8,30];
+ if([5,12,13].includes(i)){
+  head+=p(
+   i===13?
+   "M29 47Q21 17 39 13Q68 3 72 31L71 54 61 47 62 22Q48 30 34 33L35 48Z":
+   "M27 48Q21 12 43 12Q69 7 73 31L70 53 61 43 61 29 50 19 36 34 35 46Z",
+   h
+  );
+ }
+ if(i===2){
+  head+=p(
+   "M29 31Q27 12 42 15Q48 6 62 17L69 29 55 25 38 31Z",
+   "#f2eee0"
+  );
+ }
+ if(i===3){
+  for(let j=0;j<6;j++){
+   head+=e(46+j%2*7,21+Math.floor(j/2)*4,1,1,"#77523e");
+  }
+ }
+ if(i===6)head+=e(50,23,15,8,"#9855b3");
+ if(i===7||i===16){
+  head+=p(
+   "M28 37L22 8 43 18 52 23 71 4 75 30 65 38 61 29 39 29Z",
+   i===7?"#79a855":"#e8e6ef"
+  );
+ }
+ if(i===7){
+  for(const [x,y] of [[31,21],[35,24],[64,21],[66,17],[39,58],[57,70]]){
+   extra+=e(x,y,2,2,ink);
+  }
+ }
+ if(i===16){
+  head+=p("M32 40L48 44 68 35 63 48 51 55 38 49Z","#e8e6ef");
+ }
+ if(i===8){
+  head+=p("M43 19Q43 3 59 7Q70 13 78 6Q76 20 59 16L54 23Z",k);
+ }
+ if(i===10){
+  head+=p("M47 16L51 15 52 31 49 34Z","#877491");
+ }
+ if(i===14){
+  head+=p(
+   "M28 31Q23 20 34 14L23 9 41 10 42 2 55 9 75 5 66 17 74 18 60 27 51 20 36 31Z",
+   h
+  );
+  head+=e(70,44,3,5,gold);
+ }
+ if(i===15){
+  head+=p("M32 23L32 8 43 20Z M59 19L68 7 67 25Z",white);
+  head+=p("M41 44L50 41 59 44 52 45 50 53 46 45Z",ink);
+ }
+
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112">'+
+  '<g stroke="#252237" stroke-width="1.4" stroke-linejoin="round">'+
+  a+b+head+extra+'</g></svg>';
+}
+
+/* ================= 額外角色與型態 ================= */
+
+const V=[
+["超級賽亞人悟空",0,"#f7d55a","spike"],
+["超級賽亞人貝吉達",1,"#f7d55a","spike"],
+["少年悟飯",4,"#181d2c","child"],
+["暴走凱爾",9,"#a9df56","female"],
+["迷你悟空",0,"#182033","child"],
+["弗利沙第一型態",6,"#a06bc5","horns"],
+["波傑克",9,"#d94c37","bojack"],
+["超級烏普",4,"#171c29","uub"],
+["超二卡莉芙拉",0,"#f9dd64","female"],
+["伽瑪1號＆2號",12,"#a0abb3","gamma"],
+["超三悟空",0,"#f7da67","long"],
+["超級悟天克斯",17,"#f7db63","child"],
+["托破",9,"#886c99","toppo"],
+["究極悟飯",4,"#161b25","orange"],
+["超級貝吉特",0,"#f6da5c","vegito"],
+["超級賽亞人神悟空",0,"#ed3851","spike"],
+["超級賽亞人神貝吉達",1,"#ed3851","spike"],
+["傑克",12,"#aab7c0","jaco"],
+["超四貝吉達",1,"#21202d","ss4"],
+["小普烏",8,"#ef9cbb","kidbuu"],
+["超藍貝吉達",1,"#39c6e7","spike"],
+["超藍悟空",0,"#39c6e7","spike"],
+["吉連",10,"#a9a8b5","jiren"],
+["貝比・少年體",6,"#e9eeee","baby"],
+["布瑪",13,"#54d4c5","bulma"],
+["凱芙拉",9,"#9cde54","female"],
+["超級賽亞人布羅利",9,"#f1d95f","spike"],
+["超級賽亞人特南克斯",5,"#f4df68","spike"],
+["少年悟空",0,"#182033","child"]
+];
+
+V.forEach(([name,b,hair])=>{
+ let a=[...D[b]];
+ a[0]=name;
+ a[3]=hair;
+ D.push(a);
+});
+
+const base=i=>i<18?i:V[i-18][1];
+
+function sprite(i,form=false){
+ let b=base(i),saved=D[b];
+ let spec=i<18?null:V[i-18],a=[...D[i]];
+
+ if(spec?.[3]==="bulma"){
+  a[3]="#54d4c5";a[1]="#4ab7b9";
+ }
+ if(spec){
+  a[3]=form?
+   (spec[3]==="long"?"#73dfff":"#b8eeff"):spec[2];
+
+  if(["orange","child"].includes(spec[3])&&b===4)a[1]="#ed8b32";
+  if(spec[3]==="female")a[1]="#ba4272";
+  if(spec[3]==="uub")a[2]="#a16d48";
+  if(spec[3]==="bojack")a[2]="#92ba7c";
+  if(spec[3]==="ss4")a[1]="#b84455";
+ }
+
+ D[b]=a;
+ let s=art(b,spec?false:form);
+ D[b]=saved;
+
+ let p=path,e=oval,extra="",before="",kind=spec?.[3];
+
+ if(kind==="female"){
+  extra=p("M29 53L42 57 58 57 71 53 64 69 36 69Z","#b84175");
+  extra+=p("M36 70L64 70 60 80 39 80Z",a[2]);
+  extra+=p("M34 81L66 81 68 99 54 103 49 89 45 103 31 100Z","#ad4270");
+ }
+ if(kind==="jiren"){
+  extra=e(50,29,24,25,"#aaa5b4");
+  extra+=e(39,30,9,12,"#232333")+e(61,30,9,12,"#232333");
+  extra+=p("M28 53L71 53 62 80 36 80Z","#c8434e");
+ }
+ if(kind==="baby"){
+  extra=p("M26 26L24 12 41 11 50 4 61 12 74 13 69 28Z","#edf1ef");
+  extra+=p("M35 36L44 39 41 43 34 40 M57 39L65 36 66 40 59 43Z","#dc555c");
+ }
+ if(kind==="long"){
+  before=p("M30 20L16 91 30 79 35 99 48 86 59 100 65 79 82 92 70 20Z",a[3]);
+ }
+ if(kind==="horns"){
+  extra=p("M28 29L12 14 17 38 32 41 M69 30L87 14 81 39 67 41Z","#eee8df");
+ }
+ if(kind==="bojack"){
+  extra=p("M29 32L17 20 29 21 25 9 44 16 48 4 59 14 74 10 69 23 77 28 65 33Z","#c64a31");
+ }
+ if(kind==="uub"){
+  extra=p("M34 30L32 19 47 19 48 4 58 8 63 29 53 22Z","#181c26");
+ }
+ if(kind==="toppo"){
+  extra=e(50,27,21,16,"#87658b");
+  extra+=p("M27 33Q40 22 50 37Q63 22 75 33L65 49 52 42 35 49Z","#e9dfed");
+ }
+ if(kind==="gamma"||kind==="jaco"){
+  extra=p("M29 26Q25 8 49 8Q72 7 71 27L63 43 37 43Z","#a8b6b9");
+  extra+=p("M32 26L46 30 44 36 34 34 M54 30L68 26 66 34 56 36Z","#f3e967");
+  extra+=p("M30 52L68 52 66 80 34 80Z",kind==="gamma"?"#edbc39":"#7b68b4");
+  if(kind==="gamma"){
+   extra+=p("M45 11L44 0 50 7 57 0 56 11Z","#718b9c");
+   extra+=e(51,60,3,3,"#e5eee8")+e(51,70,3,3,"#e5eee8");
+  }
+ }
+ if(kind==="vegito"){
+  extra=p("M32 52L42 54 50 67 59 54 68 52 63 79 35 79Z","#35679e");
+  extra+=e(30,42,2,4,"#f5d35d")+e(70,42,2,4,"#f5d35d");
+ }
+ if(kind==="ss4"){
+  extra=p("M28 53L42 60 45 77 34 80Z M58 60L69 53 65 81 55 77Z","#ce5562");
+ }
+ if(kind==="kidbuu"){
+  extra=p("M29 53Q50 49 70 53L64 78 36 78Z","#ef9cbb");
+ }
+
+ s=s.replace('<g stroke=',before+'<g stroke=')
+    .replace('</g></svg>',extra+'</g></svg>');
+
+ if(kind==="child"){
+  s=s.replace('viewBox="0 0 100 112"','viewBox="-8 -9 116 130"');
+ }
+
+ s=s.replace('<svg xmlns=','<svg width="100" height="112" xmlns=');
+
+ if(kind==="gamma"){
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="112" viewBox="0 0 140 130">'+
+   '<g transform="translate(0,10)">'+s+'</g>'+
+   '<g transform="translate(52,18)">'+
+   s.replaceAll("#edbc39","#dc544f")+'</g></svg>';
+ }
+ return s;
+}
+
+/* ================= 全王與小怪圖像 ================= */
+
+function npc(type){
+ let p=path,e=oval,s="";
+
+ if(type==="zeno"){
+  s=p("M28 46L72 46 76 93 24 93Z","#bd5cbb");
+  s+=p("M37 49L63 49 63 92 37 92Z","#f7dd60");
+  s+=p("M43 54L56 54 43 81 57 81","none");
+  s+=p("M25 51L15 76 25 80 35 56 M67 55L76 81 86 74 77 49Z","#5ba9e0");
+  s+=e(50,28,31,25,"#7364c2");
+  s+=p("M33 8Q50 -1 68 9L66 45Q51 54 34 44Z","#65b8e6");
+  s+=e(41,26,5,9,"#fff")+e(60,26,5,9,"#fff");
+  s+=e(42,27,2,5,"#28263a")+e(59,27,2,5,"#28263a");
+  s+=p("M45 42L55 42 50 46Z","#333");
+  s+=p("M29 93L42 93 40 105 26 105 M58 93L70 93 74 105 60 105Z","#fff1d7");
+ }else if(type==="saiba"||type==="junior"){
+  let c=type==="saiba"?"#95c85c":"#6dbbe5";
+  s=p("M31 50L69 50 76 78 65 89 69 105 54 105 49 88 43 105 28 105 32 86 23 76Z",c);
+  s+=p("M29 51L12 75 20 82 37 64 M68 51L88 73 82 83 62 64Z",c);
+  s+=e(50,29,23,25,c);
+  s+=p("M30 24L14 17 27 39 M70 24L87 17 73 39Z",c);
+  s+=p("M33 30L46 34 43 40 35 37 M55 34L68 30 65 38 58 40Z","#d3454b");
+  s+=p("M39 48Q50 41 61 48L50 54Z","#323a2c");
+  s+=p("M48 5L45 23 51 29 56 19 53 6Z","#4a794d");
+  if(type==="junior"){
+   s+=p("M29 20L25 3 46 16 53 16 75 3 70 25Z","#276997");
+  }
+ }else{
+  s=p("M31 51L69 51 68 83 62 105 51 105 49 84 43 105 29 105Z","#333f62");
+  s+=p("M28 52L70 52 64 73 35 73Z","#e8e8df");
+  s+=p("M34 59L65 59 62 76 38 76Z","#bd915a");
+  s+=p("M27 53L12 78 23 83 36 64 M69 52L86 75 75 83 62 62Z","#829cc5");
+  s+=e(50,31,23,22,"#99afd0");
+  s+=p("M27 28L27 12 50 5 73 15 73 30Z","#eae9df");
+  s+=p("M52 26L74 26 72 37 52 37Z","#d9576d");
+ }
+
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112">'+
+  '<g stroke="#252437" stroke-width="2" stroke-linejoin="round">'+
+  s+'</g></svg>';
+}
+
+const image=s=>{
+ let a=new Image();
+ a.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s);
+ return a;
+};
+
+const pics=D.map((_,i)=>[
+ image(sprite(i)),
+ image(sprite(i,true))
+]);
+
+const npcs=Object.fromEntries(
+ ["zeno","saiba","junior","soldier"].map(k=>[k,image(npc(k))])
+);
+
+/* ================= 技能設定 ================= */
+
+const N=[
+["龜派氣功","瞬身連擊","界王拳","元氣彈"],
+["加力砲","突擊連打","戰鬥護盾","終極閃光"],
+["魔閃光","再生領域","伸長拳","魔貫光殺炮"],
+["氣圓斬","太陽拳","殘像拳","連續氣圓斬"],
+["魔閃光","爆發連擊","潛能爆發","究極氣功"],
+["燃燒攻擊","劍刃旋風","高速斬擊","終結爆破"],
+["死亡光束","尾巴掃擊","能量護罩","超新星"],
+["龜派氣功","生命吸收","能量屏障","完全體氣功"],
+["魔人光線","魔人再生","肉彈衝撞","爆發波"],
+["爆破彈","狂暴震地","霸體護盾","巨型能量彈"],
+["閃時突襲","時間牢籠","時間護盾","時之牢籠"],
+["破壞彈","破壞衝擊","神之護盾","破壞能量球"],
+["連射能量彈","能源防護壁","高速突擊","超級電擊"],
+["氣圓斬","連環飛踢","能源屏障","雙重氣圓斬"],
+["神裂光刃","神之再生","神之護盾","神聖光彈"],
+["魔界火球","石化魔唾","魔王護盾","魔界烈焰"],
+["破壞光線","裝甲突擊","能量護盾","超級新星"],
+["星塵彈","星塵突擊","融合護盾","星塵碎擊"]
+];
+
+const behavior=[
+["beam","rush","guard","bomb"],
+["beam","rush","guard","beam"],
+["beam","heal","rush","beam"],
+["disc","stun","guard","fan"],
+["beam","rush","guard","beam"],
+["bomb","spin","rush","bomb"],
+["beam","spin","guard","bomb"],
+["beam","drain","guard","beam"],
+["beam","heal","rush","nova"],
+["bomb","spin","guard","bomb"],
+["rush","stun","guard","freeze"],
+["bomb","spin","guard","bomb"],
+["fan","guard","rush","beam"],
+["disc","rush","guard","fan"],
+["beam","heal","guard","bomb"],
+["bomb","stun","guard","fan"],
+["beam","rush","guard","bomb"],
+["fan","rush","guard","fan"]
+];
+
+// 普攻類型固定，近戰不會因為距離遠而改射氣彈。
+const ranged=i=>[2,3,6,7,12,13,14,15].includes(base(i));
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const LY=[1150,3050];
+const home=t=>t?W-220:220;
+const wall={x:1800,y:1750,w:3600,h:700};
+
+let pick=0,state="menu",time=0,last=0;
+let units=[],mobs=[],gods=[],balls=[],zenos=[],shots=[],fx=[];
+let me,camX,camY,z,w,h,score=[0,0],feedUntil=0;
+
+const keys=new Set();
+const held=new Map();
+const codes=["KeyJ","KeyQ","KeyE","KeyR","KeyT","KeyF","Space"];
+const costs=[0,15,25,25,50,60,12];
+const cool=[.32,4,7,9,18,30,3];
+const unlock=[1,2,3,4,5,7,1];
+
 let joy=[0,0],pid=null;
-const reset=()=>{keys.clear();held.clear();pid=null;joy=[0,0];$("nub").style.transform=""};
+
+/* ================= 選角與操作重置 ================= */
+
+function choose(i){
+ pick=i;
+ $("detail").textContent=
+  D[i][0]+"｜普攻："+(ranged(i)?"氣彈":"拳腳")+
+  "｜"+N[base(i)].join("／");
+
+ [...$("cards").children].forEach((b,j)=>{
+  b.classList.toggle("sel",i===j);
+ });
+}
+
+D.forEach((d,i)=>{
+ let b=document.createElement("button");
+ b.className="card";
+ b.innerHTML=sprite(i)+"<b>"+d[0]+"</b><span>"+
+  (ranged(i)?"氣彈":"拳腳")+"・3 技能＋大招</span>";
+ b.onclick=()=>choose(i);
+ $("cards").append(b);
+});
+
+choose(0);
+
+$("search").oninput=e=>{
+ [...$("cards").children].forEach((b,i)=>{
+  b.hidden=!D[i][0].includes(e.target.value.trim());
+ });
+};
+
+function reset(){
+ keys.clear();
+ held.clear();
+ joy=[0,0];
+ pid=null;
+ $("nub").style.transform="";
+}
+
+function say(s){
+ $("feed").textContent=s;
+ feedUntil=time+4;
+}
+
+/* ================= 中央牆與路徑 ================= */
+
+function inside(x,y,r=0){
+ return x>wall.x-r&&x<wall.x+wall.w+r&&
+  y>wall.y-r&&y<wall.y+wall.h+r;
+}
+
+// 線段取樣，防止移動、衝刺及瞬移穿牆。
+function clear(a,b,r=0){
+ let n=Math.ceil(dist(a,b)/12);
+
+ for(let j=0;j<=n;j++){
+  let t=n?j/n:0;
+  if(inside(
+   a.x+(b.x-a.x)*t,
+   a.y+(b.y-a.y)*t,
+   r
+  ))return false;
+ }
+ return true;
+}
+
+function move(u,dx,dy){
+ let n=Math.ceil(Math.hypot(dx,dy)/12)||1;
+
+ for(let j=0;j<n;j++){
+  let x=clamp(u.x+dx/n,35,W-35);
+  let y=clamp(u.y+dy/n,35,H-35);
+
+  if(!inside(x,u.y,26))u.x=x;
+  if(!inside(u.x,y,26))u.y=y;
+ }
+}
+
+// 可見角點最短路徑，AI 可以繞過中央牆。
+function waypoint(u,target){
+ if(clear(u,target,25))return target;
+
+ let r=55;
+ let a=[
+  u,target,
+  {x:wall.x-r,y:wall.y-r},
+  {x:wall.x+wall.w+r,y:wall.y-r},
+  {x:wall.x-r,y:wall.y+wall.h+r},
+  {x:wall.x+wall.w+r,y:wall.y+wall.h+r}
+ ];
+
+ let d=a.map(()=>Infinity);
+ let prev=[];
+ let done=new Set();
+ d[0]=0;
+
+ for(let n=0;n<a.length;n++){
+  let k=-1;
+
+  for(let j=0;j<a.length;j++){
+   if(!done.has(j)&&(k<0||d[j]<d[k]))k=j;
+  }
+
+  if(k<0||!isFinite(d[k]))break;
+  done.add(k);
+
+  for(let j=0;j<a.length;j++){
+   if(
+    !done.has(j)&&clear(a[k],a[j],25)&&
+    d[j]>d[k]+dist(a[k],a[j])
+   ){
+    d[j]=d[k]+dist(a[k],a[j]);
+    prev[j]=k;
+   }
+  }
+ }
+
+ let k=1;
+ if(prev[k]===undefined)return u;
+ while(prev[k]!==0)k=prev[k];
+ return a[k];
+}
+
+/* ================= 開始遊戲 ================= */
 
 function start(){
- let pool=D.map((_,i)=>i).filter(i=>i!==pick);
- for(let i=pool.length-1;i;i--){
-  let j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]
+ let ids=D.map((_,i)=>i).filter(i=>i!==pick);
+
+ for(let i=ids.length-1;i>0;i--){
+  let j=Math.floor(Math.random()*(i+1));
+  [ids[i],ids[j]]=[ids[j],ids[i]];
  }
- pool.unshift(pick);
- units=pool.slice(0,8).map((id,i)=>{
-  let team=i>>2,d=D[id],m=team?+$("diff").value:1;
-  return {id,team,x:home(team),y:H/2+(i%4-1.5)*70,lane:i%2,
-   hp:d[4]*m,max:d[4]*m,power:d[5]*m,speed:d[6],ki:100,lv:1,xp:0,
-   cd:Array(6).fill(0),a:team?Math.PI:0,form:0,shield:0,stun:0,inv:0,dead:0,pose:0,ko:0}
+ ids.unshift(pick);
+
+ units=ids.slice(0,8).map((id,i)=>{
+  let team=i>>2;
+  let d=D[id];
+  let f=team?+$("diff").value:1;
+
+  return {
+   kind:"hero",id,team,lane:i%2,
+   x:home(team),y:H/2+(i%4-1.5)*75,
+   hp:d[4]*f,max:d[4]*f,power:d[5]*f,
+   speed:d[6]*1.12,ki:100,lv:1,kills:0,ko:0,
+   cd:Array(7).fill(0),a:team?Math.PI:0,
+   form:0,shield:0,stun:0,inv:0,dead:0,pose:0,nav:0
+  };
  });
- balls=[0,1].map(team=>({team,x:home(team),y:H/2,hp:6000,max:6000,ball:true}));towers=[];
- for(let team of [0,1])for(let lane of [0,1])for(let depth of [0,1]){
-  let f=depth?.20:.35,max=depth?2300:1800;
-  towers.push({team,lane,depth,x:W*(team?1-f:f),y:H*(lane?.71:.29),hp:max,max,tower:true,wait:0})
+
+ gods=[];
+ balls=[0,1].map(team=>({
+  kind:"ball",team,
+  x:home(team),y:H/2,hp:6000,max:6000
+ }));
+
+ for(let team of [0,1]){
+  for(let lane of [0,1]){
+   for(let depth of [0,1]){
+    let x=depth?1300:2500;
+
+    gods.push({
+     kind:"god",team,lane,depth,
+     x:team?W-x:x,y:LY[lane],
+     hp:depth?2400:1800,
+     max:depth?2400:1800,
+     wait:0
+    });
+   }
+  }
  }
- shots=[];fx=[];score=[0,0];t=0;me=units[0];state="play";reset();
- $("menu").hidden=true;$("ui").hidden=false;$("pause").textContent="暫停";
+
+ // 上下路各一位全王，初始支援不同隊伍。
+ zenos=[0,1].map(lane=>({
+  lane,team:lane,x:W/2,y:LY[lane]+120
+ }));
+
+ mobs=[];
+
+ for(let lane=0;lane<2;lane++){
+  for(let x of [550,1050,1750,3200,4000,5450,6150,6650]){
+   for(let j=0;j<2;j++){
+    let y=LY[lane]+(j?230:-230);
+    let type=["saiba","junior","soldier"][
+     (Math.round(x/50)+j)%3
+    ];
+
+    mobs.push({
+     kind:"mob",type,team:2,lane,
+     x,y,sx:x,sy:y,hp:240,max:240,
+     wait:0,dead:0,stun:0,inv:0
+    });
+   }
+  }
+ }
+
+ shots=[];
+ fx=[];
+ time=0;
+ score=[0,0];
+ me=units[0];
+ state="play";
+ reset();
+
+ $("menu").hidden=true;
+ $("ui").hidden=false;
+ $("pause").textContent="暫停";
+
+ say("先打小怪！每親手擊倒兩隻升一級。小地圖綠點是小怪。");
 }
+
 $("start").onclick=start;
-function menu(){state="menu";reset();$("menu").hidden=false;$("ui").hidden=true}
-$("back").onclick=menu;
+
+$("back").onclick=()=>{
+ state="menu";
+ reset();
+ $("menu").hidden=false;
+ $("ui").hidden=true;
+};
+
 function pause(){
  if(!["play","pause"].includes(state))return;
- state=state==="play"?"pause":"play";reset();
- $("pause").textContent=state==="play"?"暫停":"繼續"
+ state=state==="play"?"pause":"play";
+ reset();
+ $("pause").textContent=state==="play"?"暫停":"繼續";
 }
+
 $("pause").onclick=pause;
 
-const open=team=>[0,1].some(l=>!towers.some(b=>b.team===team&&b.lane===l&&b.hp>0));
-const valid=o=>o.hp>0&&(o.ball?open(o.team):!o.tower||!o.depth||
- !towers.some(b=>b.team===o.team&&b.lane===o.lane&&!b.depth&&b.hp>0));
-const foes=u=>[...units,...towers,...balls].filter(o=>u.team!==o.team&&valid(o));
-const near=(u,r)=>foes(u).filter(o=>dist(u,o)<r).sort((a,b)=>dist(u,a)-dist(u,b))[0];
-function gain(u,n){
- if(u.id==null||u.lv>=10)return;u.xp+=n;
- if(u.xp>=90*u.lv){u.xp-=90*u.lv++;u.max+=110;u.power+=5;if(u.hp>0)u.hp=Math.min(u.max,u.hp+230)}
+/* ================= 目標、等級、傷害 ================= */
+
+const alive=o=>o.hp>0;
+
+const open=team=>[0,1].some(l=>
+ !gods.some(b=>b.team===team&&b.lane===l&&alive(b))
+);
+
+function front(team,lane){
+ return gods
+  .filter(b=>b.team===team&&b.lane===lane&&alive(b))
+  .sort((a,b)=>a.depth-b.depth)[0];
 }
-function hit(u,o,n){
- if(state!=="play"||!valid(o)||o.inv>0)return 0;
- let v=Math.min(o.hp,Math.round(n*(o.shield>0?.45:1)));o.hp-=v;
+
+function suppressed(o){
+ let q=zenos[o.lane];
+ return q.team!==o.team&&dist(q,o)<185;
+}
+
+function valid(o){
+ return alive(o)&&(
+  o.kind==="god"?
+   front(o.team,o.lane)===o&&suppressed(o):
+  o.kind==="ball"?
+   open(o.team):
+   true
+ );
+}
+
+const enemies=u=>
+ [...units,...mobs,...gods,...balls].filter(o=>
+  o!==u&&o.team!==u.team&&valid(o)
+ );
+
+function nearest(u,r){
+ return enemies(u)
+  .filter(o=>dist(u,o)<r&&clear(u,o))
+  .sort((a,b)=>dist(u,a)-dist(u,b))[0];
+}
+
+function level(u){
+ u.kills++;
+ let next=Math.min(12,1+Math.floor(u.kills/2));
+
+ if(next<=u.lv)return;
+
+ u.lv=next;
+ u.max+=100;
+ u.hp=Math.min(u.max,u.hp+220);
+ u.power+=5;
+
+ if(u===me){
+  say(
+   "Lv."+u.lv+"！"+
+   (u.lv<5?"解鎖技能 "+(u.lv-1):
+    u.lv===5?"解鎖大招":
+    u.lv===7?"技能強化＋開放變身":
+    "獲得技能強化")
+  );
+ }
+}
+
+function hit(u,o,p){
+ if(
+  state!=="play"||u.team===o.team||
+  !valid(o)||o.inv>0
+ )return 0;
+
+ let n=Math.min(
+  o.hp,
+  Math.round(p*(o.shield>0?.45:1))
+ );
+ o.hp-=n;
+
  if(o.hp===0){
-  if(o.ball){state=u.team?"lose":"win";reset()}
-  else if(o.tower){units.filter(h=>h.team===u.team).forEach(h=>gain(h,85))}
-  else{o.dead=7+o.lv*.65;score[u.team]++;if(u.id!=null){u.ko++;gain(u,100)}}
- }return v
+  if(o.kind==="mob"){
+   o.dead=18;
+   if(u.kind==="hero")level(u);
+  }else if(o.kind==="hero"){
+   o.dead=7+o.lv*.6;
+   score[1-o.team]++;
+   if(u.kind==="hero")u.ko++;
+  }else if(o.kind==="god"){
+   say(
+    (o.team?"敵方":"我方")+
+    (o.lane?"下路":"上路")+
+    "破壞神被擊敗！"
+   );
+  }else if(o.kind==="ball"){
+   state=u.team?"lose":"win";
+   reset();
+  }
+ }
+ return n;
 }
-const ring=(x,y,r,c)=>fx.push({x,y,r,c,life:.45});
-function fire(u,a,p,r=8,c="#a8eaff",speed=820,range=670,pierce=false){
- shots.push({u,x:u.x,y:u.y,a,p,r,c,speed,left:range,pierce,seen:new Set()})
+
+const ring=(x,y,r,c)=>fx.push({
+ x,y,r,c,life:.45
+});
+
+function fire(
+ u,a,p,r=9,c="#9ce7ff",
+ speed=850,range=650,pierce=false
+){
+ shots.push({
+  u,x:u.x,y:u.y,a,p,r,c,speed,
+  left:range,pierce,seen:new Set()
+ });
 }
-const sp=["rush","guard","heal","stun","rush","spin","snipe","drain","heal","spin","time","spin","guard","rush","heal","stone","rush","rush"];
-const ul=["bomb","beam","beam","disc","beam","bomb","bomb","beam","nova","bomb","freeze","bomb","beam","disc","beam","fan","bomb","fan"];
+
+/* ================= 普攻、技能、大招 ================= */
 
 function cast(u,k){
- if(state!=="play"||u.hp<=0||u.stun>0||u.cd[k]>0||u.ki<cost[k]||
-    (k===3&&u.lv<2)||(k===5&&u.lv<3))return;
- u.cd[k]=cd[k];u.ki-=cost[k];
- let o=k===4?null:near(u,[350,650,440,780,0,0][k]),p=u.power*(u.form>0?1.4:1);
+ if(
+  state!=="play"||!alive(u)||u.stun>0||
+  u.lv<unlock[k]||u.cd[k]>0||u.ki<costs[k]
+ )return;
+
+ let range=k===0?(ranged(u.id)?600:115):750;
+ let o=k>=5?null:nearest(u,range);
+
  if(o)u.a=Math.atan2(o.y-u.y,o.x-u.x);
- const zone=(x,y,r,n,st=0)=>{
-  let total=0;ring(x,y,r,"#ffda89");
-  for(let v of foes(u))if(dist({x,y},v)<r){
-   let dmg=hit(u,v,n);total+=dmg;if(dmg&&v.id!=null)v.stun=Math.max(st,v.stun)
-  }return total
- };
- const mend=r=>units.filter(v=>v.hp>0&&v.team===u.team&&dist(u,v)<r)
-  .forEach(v=>v.hp=Math.min(v.max,v.hp+330));
+
+ u.cd[k]=cool[k];
+ u.ki-=costs[k];
+
+ let p=u.power*(u.form>0?1.4:1);
+
+ if(k>=1&&k<=4){
+  p*=1+.16*Math.max(
+   0,
+   Math.floor((u.lv-6-(k-1))/4)+1
+  );
+ }
+
+ // 唯一普攻：氣彈或拳腳。
  if(k===0){
   u.pose=.18;
-  if(o&&dist(u,o)<110){hit(u,o,p*1.25);ring(o.x,o.y,34,"#fff2bc")}
-  else fire(u,u.a,p,7,"#ffdc8e",680,350)
- }
- if(k===1)fire(u,u.a,p*1.25,12);
- if(k===4){
-  u.x=clamp(u.x+235*Math.cos(u.a),40,W-40);u.y=clamp(u.y+235*Math.sin(u.a),40,H-40);
-  u.inv=.3;ring(u.x,u.y,45,C[u.team])
- }
- if(k===5){u.form=13;ring(u.x,u.y,100,"#ffde77")}
- if(k===2){
-  let s=sp[u.id];
-  if(s==="guard")u.shield=5;
-  else if(s==="heal"){mend(280);ring(u.x,u.y,280,"#99f0ae")}
-  else if(s==="snipe")fire(u,u.a,4.2*p,10,"#e79aff",1050,900,true);
-  else if(s==="rush"||s==="time"){
-   if(o){
-    u.x=clamp(o.x-65*Math.cos(u.a),40,W-40);u.y=clamp(o.y-65*Math.sin(u.a),40,H-40);
-    u.pose=.35;if(hit(u,o,p*3.5)&&s==="time"&&o.id!=null)o.stun=1.4
-   }ring(u.x,u.y,85,"#edd8ff")
+
+  if(ranged(u.id)){
+   fire(u,u.a,p,9,"#ffe19a",850,610);
   }else{
-   let v=zone(u.x,u.y,250,p*(s==="stun"?1:3),["stone","stun"].includes(s)?1.8:0);
-   if(s==="drain")u.hp=Math.min(u.max,u.hp+.65*v)
+   ring(
+    u.x+Math.cos(u.a)*55,
+    u.y+Math.sin(u.a)*55,
+    40,"#ffe7af"
+   );
+   if(o)hit(u,o,p*1.8);
+  }
+  return;
+ }
+
+ // Lv.7 變身。
+ if(k===5){
+  u.form=15;
+  ring(u.x,u.y,105,"#ffe081");
+  return;
+ }
+
+ // 衝刺也會受中央牆阻擋。
+ if(k===6){
+  move(
+   u,
+   Math.cos(u.a)*235,
+   Math.sin(u.a)*235
+  );
+  u.inv=.25;
+  return;
+ }
+
+ let kind=behavior[base(u.id)][k-1];
+ let ult=k===4;
+
+ function area(x,y,r,n,st=0){
+  ring(x,y,r,"#e3b7ff");
+  let total=0;
+
+  for(let v of enemies(u)){
+   if(dist({x,y},v)<r&&clear({x,y},v)){
+    let a=hit(u,v,n);
+    total+=a;
+
+    if(a&&["hero","mob"].includes(v.kind)){
+     v.stun=st;
+    }
+   }
+  }
+  return total;
+ }
+
+ if(kind==="guard"){
+  u.shield=5;
+  ring(u.x,u.y,80,"#96d5ff");
+ }
+
+ if(kind==="heal"){
+  for(let v of units){
+   if(
+    v.team===u.team&&alive(v)&&
+    dist(u,v)<280&&clear(u,v)
+   ){
+    v.hp=Math.min(v.max,v.hp+300+u.lv*20);
+   }
+  }
+  ring(u.x,u.y,280,"#a1ffc0");
+ }
+
+ if(kind==="rush"){
+  if(o){
+   let d=dist(u,o);
+   move(
+    u,
+    Math.cos(u.a)*Math.max(0,d-65),
+    Math.sin(u.a)*Math.max(0,d-65)
+   );
+
+   if(dist(u,o)<120&&clear(u,o)){
+    hit(u,o,p*3.5);
+   }
+  }
+  u.pose=.3;
+  ring(u.x,u.y,85,"#fff0d0");
+ }
+
+ if(["spin","stun","drain","nova","freeze"].includes(kind)){
+  let sum=area(
+   u.x,u.y,
+   ult?370:250,
+   p*(ult?5:kind==="stun"?1:3),
+   ["stun","freeze"].includes(kind)?2:0
+  );
+
+  if(kind==="drain"){
+   u.hp=Math.min(u.max,u.hp+sum*.6);
   }
  }
- if(k===3){
-  let s=ul[u.id],x=o?.x??u.x+440*Math.cos(u.a),y=o?.y??u.y+440*Math.sin(u.a);
-  if(s==="bomb")fx.push({x,y,r:190,c:"#93e2ff",life:.85,bomb:true,u,p:7*p});
-  if(s==="beam")fire(u,u.a,7*p,26,"#dbb6ff",1050,950,true);
-  if(s==="disc"||s==="fan")for(let j=-1;j<=1;j++)
-   fire(u,u.a+j*.16,3.8*p,16,s==="disc"?"#ffe478":"#ffad81",800,950,true);
-  if(s==="nova"){zone(u.x,u.y,380,p*6);mend(380)}
-  if(s==="freeze")zone(x,y,260,p*4.5,2.5)
+
+ if(kind==="beam"){
+  fire(
+   u,u.a,p*(ult?7:2.6),
+   ult?25:14,"#b6dcff",
+   1000,850,ult
+  );
+ }
+
+ if(kind==="fan"||kind==="disc"){
+  for(let j=-1;j<=1;j++){
+   fire(
+    u,u.a+j*.16,p*(ult?3.5:1.6),
+    kind==="disc"?16:9,
+    "#ffe48a",850,760,
+    kind==="disc"
+   );
+  }
+ }
+
+ if(kind==="bomb"){
+  let x=o?o.x:u.x+430*Math.cos(u.a);
+  let y=o?o.y:u.y+430*Math.sin(u.a);
+
+  if(clear(u,{x,y})){
+   fx.push({
+    x,y,r:ult?190:130,c:"#94e1ff",
+    life:.8,bomb:true,u,p:p*(ult?7:2.8)
+   });
+  }
  }
 }
 
-// 戰鬥更新
+/* ================= 遊戲更新 ================= */
+
 function step(dt){
- t+=dt;
+ time+=dt;
+
+ // 每50秒交換上下路攻守，全王實際步行到下一位破壞神。
+ for(let q of zenos){
+  let team=(Math.floor(time/50)+q.lane)%2;
+
+  if(team!==q.team){
+   q.team=team;
+   say(
+    (q.lane?"下路":"上路")+
+    "攻守交換！"+(team?"紅隊":"藍隊")+"進攻。"
+   );
+  }
+
+  let target=front(1-q.team,q.lane)||{
+   x:home(1-q.team),y:LY[q.lane]
+  };
+  let tx=target.x;
+
+  q.x+=Math.sign(tx-q.x)*
+   Math.min(Math.abs(tx-q.x),440*dt);
+ }
+
  for(let u of units){
   if(state!=="play")return;
+
   u.cd=u.cd.map(n=>Math.max(0,n-dt));
-  for(let s of ["inv","form","stun","shield","pose"])u[s]=Math.max(0,u[s]-dt);
-  if(u.hp<=0){
-   if((u.dead-=dt)<=0){
-    u.x=home(u.team);u.y=H/2;u.hp=u.max;u.ki=100;u.inv=2;u.stun=u.form=0
-   }continue
+
+  for(let k of ["shield","inv","stun","form","pose"]){
+   u[k]=Math.max(0,u[k]-dt);
   }
-  gain(u,3.6*dt);u.ki=Math.min(100,u.ki+13*dt);
-  if(dist(u,balls[u.team])<260)u.hp=Math.min(u.max,u.hp+u.max*.13*dt);
-  if(u.stun>0)continue;
-  let dx=0,dy=0,act=[];
-  if(u===me){
-   dx=joy[0]+Number(keys.has("KeyD")||keys.has("ArrowRight"))-Number(keys.has("KeyA")||keys.has("ArrowLeft"));
-   dy=joy[1]+Number(keys.has("KeyS")||keys.has("ArrowDown"))-Number(keys.has("KeyW")||keys.has("ArrowUp"));
-   act=[0,1].filter(k=>keys.has(codes[k])||[...held.values()].includes(k))
-  }else{
-   let enemy=near(u,680),run=u.hp<u.max*.19;
-   let goal=run?balls[u.team]:enemy||(open(1-u.team)?balls[1-u.team]:
-    towers.find(o=>o.team!==u.team&&o.lane===u.lane&&valid(o)));
-   if(goal&&dist(u,goal)>(run?50:240)){
-    let n=dist(u,goal);dx=(goal.x-u.x)/n;dy=(goal.y-u.y)/n
+
+  if(!alive(u)){
+   u.dead-=dt;
+
+   if(u.dead<=0){
+    u.dead=0;
+    u.hp=u.max;
+    u.ki=100;
+    u.x=home(u.team);
+    u.y=H/2;
+    u.form=u.stun=u.shield=0;
+    u.inv=2;
+    u.nav=0;
    }
-   if(enemy&&!run){
-    let n=dist(u,enemy);
-    if(u.lv>=3&&u.ki>88)act.push(5);
-    if(n<620)act.push(3);
-    if(n<245||(["snipe","rush","time"].includes(sp[u.id])&&n<430))act.push(2);
-    if(n<350)act.push(0);act.push(1)
-   }else if(run&&sp[u.id]==="heal")act.push(2)
+   continue;
   }
-  let len=Math.hypot(dx,dy);
-  if(len>.05){
-   u.a=Math.atan2(dy,dx);let d=u.speed*(u.form>0?1.18:1)*dt/Math.max(1,len);
-   u.x=clamp(u.x+dx*d,40,W-40);u.y=clamp(u.y+dy*d,40,H-40)
+
+  u.ki=Math.min(100,u.ki+13*dt);
+
+  if(dist(u,balls[u.team])<280){
+   u.hp=Math.min(u.max,u.hp+u.max*.12*dt);
   }
-  for(let k of act)cast(u,k)
+
+  if(u.stun>0)continue;
+
+  let dx=0,dy=0,act=[];
+
+  if(u===me){
+   dx=joy[0]+
+    Number(keys.has("KeyD")||keys.has("ArrowRight"))-
+    Number(keys.has("KeyA")||keys.has("ArrowLeft"));
+
+   dy=joy[1]+
+    Number(keys.has("KeyS")||keys.has("ArrowDown"))-
+    Number(keys.has("KeyW")||keys.has("ArrowUp"));
+
+   if(
+    keys.has("KeyJ")||
+    [...held.values()].includes(0)
+   ){
+    act.push(0);
+   }
+  }else{
+   let retreat=u.hp<u.max*.22;
+
+   let wild=mobs
+    .filter(m=>alive(m)&&m.lane===u.lane)
+    .sort((a,b)=>dist(u,a)-dist(u,b))[0];
+
+   let close=nearest(u,700);
+   let farm=u.lv<7&&wild;
+
+   let goal=retreat?
+    balls[u.team]:
+    farm?wild:
+    close||(
+     open(1-u.team)?
+     balls[1-u.team]:
+     front(1-u.team,u.lane)
+    );
+
+   if(!goal)goal=wild||balls[u.team];
+
+   let stop=
+    goal.kind==="ball"&&goal.team===u.team?
+    80:ranged(u.id)?360:85;
+
+   // 沒有全王支援，先在破壞神射程外等候。
+   if(goal.kind==="god"&&!valid(goal))stop=650;
+
+   if(dist(u,goal)>stop){
+    u.nav-=dt;
+
+    if(
+     u.nav<=0||!u.wp||
+     dist(u,u.wp)<45
+    ){
+     u.wp=waypoint(u,goal);
+     u.nav=.5;
+    }
+
+    let d=dist(u,u.wp);
+    if(d>1){
+     dx=(u.wp.x-u.x)/d;
+     dy=(u.wp.y-u.y)/d;
+    }
+   }
+
+   if(retreat){
+    if(behavior[base(u.id)][1]==="heal"){
+     act.push(2);
+    }
+   }else{
+    let target=nearest(u,750);
+
+    if(target){
+     if(u.lv>=7&&u.ki>85)act.push(5);
+     if(u.ki>65)act.push(4);
+     if(dist(u,target)<265)act.push(2,3);
+     act.push(1,0);
+    }
+   }
+  }
+
+  let n=Math.hypot(dx,dy);
+
+  if(n>.04){
+   u.a=Math.atan2(dy,dx);
+
+   let d=
+    u.speed*(u.form>0?1.16:1)*
+    dt/Math.max(1,n);
+
+   move(u,dx*d,dy*d);
+  }
+
+  for(let a of act)cast(u,a);
  }
- for(let b of towers)if(b.hp>0&&(b.wait-=dt)<=0){
-  let o=units.filter(v=>v.team!==b.team&&v.hp>0&&dist(b,v)<490)
-   .sort((a,c)=>dist(b,a)-dist(b,c))[0];
-  if(o){b.wait=1;fire(b,Math.atan2(o.y-b.y,o.x-b.x),105,12,C[b.team],620,550)}
+
+ // 小怪反擊、回到出生點、死亡後重生。
+ for(let m of mobs){
+  if(!alive(m)){
+   m.dead-=dt;
+
+   if(m.dead<=0){
+    m.hp=m.max;
+    m.x=m.sx;
+    m.y=m.sy;
+    m.stun=0;
+   }
+   continue;
+  }
+
+  m.stun=Math.max(0,m.stun-dt);
+  if(m.stun>0)continue;
+
+  let target=units
+   .filter(u=>alive(u)&&dist(m,u)<390&&clear(m,u))
+   .sort((a,b)=>dist(m,a)-dist(m,b))[0];
+
+  if(target){
+   let d=dist(m,target);
+   let r=m.type==="soldier"?230:65;
+
+   if(d>r&&dist(m,{x:m.sx,y:m.sy})<400){
+    move(
+     m,
+     (target.x-m.x)/d*125*dt,
+     (target.y-m.y)/d*125*dt
+    );
+   }
+
+   m.wait-=dt;
+
+   if(m.wait<=0){
+    m.wait=1.2;
+
+    if(m.type==="soldier"){
+     fire(
+      m,
+      Math.atan2(target.y-m.y,target.x-m.x),
+      32,8,"#f59895",520,420
+     );
+    }else if(d<90){
+     hit(m,target,35);
+    }
+   }
+  }else{
+   let d=dist(m,{x:m.sx,y:m.sy});
+
+   if(d>5){
+    move(
+     m,
+     (m.sx-m.x)/d*100*dt,
+     (m.sy-m.y)/d*100*dt
+    );
+   }
+  }
  }
+
+ // 未被全王壓制的破壞神主動攻擊。
+ for(let god of gods){
+  if(!alive(god))continue;
+
+  god.wait-=dt;
+
+  if(suppressed(god))continue;
+
+  let target=units
+   .filter(u=>
+    u.team!==god.team&&alive(u)&&
+    dist(god,u)<570&&clear(god,u)
+   )
+   .sort((a,b)=>dist(god,a)-dist(god,b))[0];
+
+  if(target&&god.wait<=0){
+   god.wait=.9;
+
+   fire(
+    god,
+    Math.atan2(target.y-god.y,target.x-god.x),
+    175,20,"#dba7ff",740,630
+   );
+  }
+ }
+
+ // 高速氣彈分段檢查碰撞，避免穿牆、穿過角色。
  for(let s of shots){
   let d=Math.min(s.left,s.speed*dt);
-  s.x+=Math.cos(s.a)*d;s.y+=Math.sin(s.a)*d;s.left-=d;
-  for(let o of foes(s.u)){
-   if(!s.seen.has(o)&&dist(s,o)<s.r+(o.ball?48:o.tower?36:23)){
-    hit(s.u,o,s.p);s.seen.add(o);if(!s.pierce){s.left=0;break}
+  let steps=Math.ceil(d/9);
+  let blocked=false;
+
+  for(let j=0;j<steps&&s.left>0;j++){
+   s.x+=Math.cos(s.a)*d/steps;
+   s.y+=Math.sin(s.a)*d/steps;
+   s.left-=d/steps;
+
+   if(inside(s.x,s.y,s.r)){
+    blocked=true;
+    break;
+   }
+
+   for(let o of enemies(s.u)){
+    if(s.seen.has(o))continue;
+
+    let r=
+     o.kind==="god"?45:
+     o.kind==="ball"?48:
+     o.kind==="mob"?20:24;
+
+    if(dist(s,o)<s.r+r){
+     hit(s.u,o,s.p);
+     s.seen.add(o);
+
+     if(!s.pierce){
+      s.left=0;
+      break;
+     }
+    }
    }
   }
+
+  if(blocked)s.left=0;
  }
- shots=shots.filter(s=>s.left>0);
+
+ shots=shots.filter(s=>
+  s.left>0&&s.x>0&&s.y>0&&s.x<W&&s.y<H
+ );
+
+ let burst=[];
+
  for(let f of fx){
   f.life-=dt;
+
   if(f.bomb&&f.life<=0){
-   for(let o of foes(f.u))if(dist(o,f)<f.r)hit(f.u,o,f.p);
-   ring(f.x,f.y,f.r,"#fff3bb")
+   for(let o of enemies(f.u)){
+    if(dist(o,f)<f.r&&clear(f,o)){
+     hit(f.u,o,f.p);
+    }
+   }
+
+   burst.push({
+    x:f.x,y:f.y,r:f.r,
+    c:"#fff0b7",life:.45
+   });
   }
- }fx=fx.filter(f=>f.life>0);
+ }
+
+ fx=fx.filter(f=>f.life>0).concat(burst);
 }
+
+/* ================= 畫面與小地圖 ================= */
 
 const dot=(x,y,r,c)=>{
- g.beginPath();g.arc(x,y,r,0,7);g.fillStyle=c;g.fill()
+ g.beginPath();
+ g.arc(x,y,r,0,7);
+ g.fillStyle=c;
+ g.fill();
 };
-const txt=(s,x,y,size,c)=>{
- g.fillStyle=c;g.font="bold "+size+"px system-ui";g.textAlign="center";g.fillText(s,x,y)
-};
-function frame(now){
- requestAnimationFrame(frame);let dt=Math.min(.033,(now-last)/1000);last=now;
- if(state==="menu")return;if(state==="play")step(dt);
- let cv=$("field"),d=Math.min(2,devicePixelRatio||1);
- w=cv.clientWidth;h=cv.clientHeight;
- if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){
-  cv.width=Math.round(w*d);cv.height=Math.round(h*d)
- }
- z=Math.max(.45,Math.min(1,w/1050,h/680));
- camX=clamp(me.x,w/2/z,W-w/2/z);camY=clamp(me.y,h/2/z,H-h/2/z);
- g.setTransform(d,0,0,d,0,0);g.fillStyle="#315c56";g.fillRect(0,0,w,h);
- g.save();g.translate(w/2-camX*z,h/2-camY*z);g.scale(z,z);
- g.fillStyle="#37778b";g.fillRect(W/2-92,0,184,H);
- for(let l of [.29,.71]){
-  g.beginPath();g.moveTo(220,H/2);g.lineTo(W*.2,H*l);g.lineTo(W*.8,H*l);
-  g.lineTo(W-220,H/2);g.strokeStyle="#859580";g.lineWidth=175;g.stroke()
- }
- for(let j=0;j<75;j++){
-  let x=(450+j*431)%W,y=(180+j*719)%H;
-  if(Math.min(Math.abs(y-.29*H),Math.abs(y-.71*H))>130){
-   dot(x,y,33,"#244c49");dot(x-6,y-6,23,"#48735c")
-  }
- }
- for(let o of [...balls,...towers,...units].sort((a,b)=>a.y-b.y)){
-  if(o.hp<=0||Math.abs(o.x-camX)>w/2/z+110||Math.abs(o.y-camY)>h/2/z+120)continue;
-  let x=o.x,y=o.y,c=C[o.team],name;
-  if(o.id!=null){
-   let big=[8,9,16].includes(o.id)?1.18:o.id===3?.87:1;
-   let im=pics[o.id][Number(o.form>0)];
-   g.save();g.translate(x,y);g.scale(Math.cos(o.a)<0?-1:1,1);
-   g.beginPath();g.ellipse(0,17,34,11,0,0,7);g.fillStyle=o===me?"#ffe68a":c;g.fill();
-   if(o.shield||o.form||o.inv)dot(0,-13,46,o.shield?"#87caff55":"#ffdb6650");
-   g.rotate(o.pose>0?.14:0);
-   if(im.complete&&im.naturalWidth)g.drawImage(im,-44*big,-76*big,88*big,99*big);
-   g.restore();name=(o===me?"你・":"")+D[o.id][0]+" "+o.lv
-  }else if(o.ball){
-   dot(x,y,48,"#ffb336");txt("★",x,y+12,33,"#be4d13");
-   name=valid(o)?"龍珠 "+o.hp:"龍珠・防護中"
-  }else{
-   g.fillStyle=c;g.fillRect(x-29,y-30,58,64);dot(x,y-28,22,"#ebecdf");
-   name=(o.depth?"內塔":"外塔")+(valid(o)?"":"・防護中")
-  }
-  g.fillStyle="#142434";g.fillRect(x-32,y-91,64,6);
-  g.fillStyle=c;g.fillRect(x-32,y-91,64*o.hp/o.max,6);txt(name,x,y-97,16,"#fff6df")
- }
- for(let s of shots){dot(s.x,s.y,s.r,s.c);dot(s.x,s.y,s.r*.45,"#fff")}
- for(let f of fx){
-  g.beginPath();g.arc(f.x,f.y,f.r*(f.bomb?1:Math.max(.1,1-f.life/.45)),0,7);
-  g.strokeStyle=f.c;g.lineWidth=4;g.stroke();if(f.bomb)dot(f.x,f.y-f.life*90,27,f.c)
- }g.restore();
 
- // 小地圖與狀態列
- let mw=Math.min(160,w*.26),mh=mw*H/W,mx=w-mw-8;
- g.fillStyle="#101e2cea";g.fillRect(mx,8,mw,mh);
- for(let l of [.29,.71]){g.fillStyle="#576859";g.fillRect(mx,8+mh*l,mw,2)}
- for(let o of [...balls,...towers,...units])if(o.hp>0)
-  dot(mx+o.x/W*mw,8+o.y/H*mh,o===me?4:o.ball?3:2,o===me?"white":o.ball?"orange":C[o.team]);
- $("hud").textContent=D[me.id][0]+" Lv."+me.lv+"｜"+
-  (me.dead>0?"復活 "+Math.ceil(me.dead):"HP "+Math.ceil(me.hp)+"　氣 "+Math.floor(me.ki))+
-  "｜擊倒 "+score.join(":")+"｜龍珠 "+balls.map(b=>b.hp).join(":");
+const txt=(s,x,y,size,c)=>{
+ g.font="bold "+size+"px system-ui";
+ g.fillStyle=c;
+ g.textAlign="center";
+ g.fillText(s,x,y);
+};
+
+function drawImage(im,x,y,scale=1,flip=false){
+ if(!im.complete||!im.naturalWidth)return;
+
+ g.save();
+ g.translate(x,y);
+ g.scale(flip?-scale:scale,scale);
+ g.drawImage(im,-45,-83,90,101);
+ g.restore();
+}
+
+function draw(){
+ let cv=$("field");
+ let d=Math.min(2,devicePixelRatio||1);
+
+ w=cv.clientWidth;
+ h=cv.clientHeight;
+
+ if(
+  cv.width!==Math.round(w*d)||
+  cv.height!==Math.round(h*d)
+ ){
+  cv.width=Math.round(w*d);
+  cv.height=Math.round(h*d);
+ }
+
+ z=Math.max(.5,Math.min(1,w/1100,h/720));
+ camX=clamp(me.x,w/2/z,W-w/2/z);
+ camY=clamp(me.y,h/2/z,H-h/2/z);
+
+ g.setTransform(d,0,0,d,0,0);
+ g.fillStyle="#2c574f";
+ g.fillRect(0,0,w,h);
+
+ g.save();
+ g.translate(w/2-camX*z,h/2-camY*z);
+ g.scale(z,z);
+
+ // 上下兩條路。
+ for(let y of LY){
+  g.beginPath();
+  g.moveTo(220,H/2);
+  g.lineTo(900,y);
+  g.lineTo(W-900,y);
+  g.lineTo(W-220,H/2);
+  g.lineWidth=180;
+  g.strokeStyle="#788e79";
+  g.stroke();
+ }
+
+ // 地形裝飾。
+ for(let j=0;j<70;j++){
+  let x=(j*947+350)%W;
+  let y=(j*433+400)%H;
+
+  if(
+   LY.every(l=>Math.abs(l-y)>330)&&
+   !inside(x,y)
+  ){
+   dot(x,y,45,"#24483e");
+   dot(x-8,y-8,30,"#537255");
+  }
+ }
+
+ // 中央實體牆。
+ g.fillStyle="#263340";
+ g.fillRect(wall.x+15,wall.y+18,wall.w,wall.h);
+ g.fillStyle="#7a8089";
+ g.fillRect(wall.x,wall.y,wall.w,wall.h);
+ g.fillStyle="#a0a2a2";
+ g.fillRect(wall.x,wall.y,wall.w,25);
+
+ g.strokeStyle="#505964";
+ g.lineWidth=3;
+
+ for(let x=wall.x;x<wall.x+wall.w;x+=140){
+  g.beginPath();
+  g.moveTo(x,wall.y);
+  g.lineTo(x,wall.y+wall.h);
+  g.stroke();
+ }
+
+ for(let y=wall.y;y<wall.y+wall.h;y+=100){
+  g.beginPath();
+  g.moveTo(wall.x,y);
+  g.lineTo(wall.x+wall.w,y);
+  g.stroke();
+ }
+
+ txt("中央封鎖牆・請走上下路",W/2,H/2,36,"#dae2dc");
+
+ let objects=[...balls,...gods,...mobs,...units]
+  .sort((a,b)=>a.y-b.y);
+
+ for(let o of objects){
+  if(
+   !alive(o)||
+   Math.abs(o.x-camX)>w/2/z+250||
+   Math.abs(o.y-camY)>h/2/z+250
+  )continue;
+
+  let {x,y}=o;
+  let name="";
+  let c=o.team===2?"#9adb7c":C[o.team];
+  let by=y-108;
+
+  dot(x,y+12,o.kind==="god"?53:30,c);
+
+  if(o.kind==="hero"){
+   if(o.shield||o.form||o.inv){
+    dot(
+     x,y-20,48,
+     o.shield?"#97daff44":"#ffdc7944"
+    );
+   }
+
+   let size=[8,9,16].includes(base(o.id))?1.12:1;
+
+   drawImage(
+    pics[o.id][Number(o.form>0)],
+    x+Math.cos(o.a)*o.pose*25,
+    y,size,Math.cos(o.a)<0
+   );
+
+   if(o.pose>0&&!ranged(o.id)){
+    let px=x+Math.cos(o.a)*52;
+    let py=y+Math.sin(o.a)*35;
+
+    g.strokeStyle="#f4c9a3";
+    g.lineWidth=13;
+    g.beginPath();
+    g.moveTo(x,y-25);
+    g.lineTo(px,py-25);
+    g.stroke();
+
+    dot(px,py-25,11,"#f1c19b");
+   }
+
+   name=(o===me?"你・":"")+D[o.id][0]+" Lv."+o.lv;
+
+   if(o.stun>0){
+    txt("暈眩",x,y-134,15,"#ffe291");
+   }
+  }else if(o.kind==="mob"){
+   drawImage(npcs[o.type],x,y,.7);
+   name={
+    saiba:"栽培人",
+    junior:"小賽魯",
+    soldier:"弗利沙軍士兵"
+   }[o.type];
+   by=y-75;
+  }else if(o.kind==="god"){
+   let disabled=suppressed(o);
+
+   drawImage(pics[11][0],x,y,1.6);
+   name="破壞神・"+(o.depth?"內防線":"外防線");
+   by=y-153;
+
+   txt(
+    disabled?"全王壓制：可攻擊":"無敵・進入射程會反擊",
+    x,y+45,16,
+    disabled?"#ffe191":"#eed8ff"
+   );
+
+   if(!disabled){
+    g.beginPath();
+    g.arc(x,y,75,0,7);
+    g.lineWidth=3;
+    g.strokeStyle="#ddb3ff";
+    g.stroke();
+   }
+  }else{
+   dot(x,y,48,"#ffb936");
+   dot(x-14,y-17,10,"#ffe5a0");
+   txt("★",x,y+14,32,"#b64123");
+
+   name="龍珠 "+Math.ceil(o.hp)+"/6000";
+   txt(open(o.team)?"可攻擊":"防護中",x,y+76,18,c);
+  }
+
+  g.fillStyle="#132334";
+  g.fillRect(x-40,by,80,7);
+  g.fillStyle=c;
+  g.fillRect(x-40,by,80*o.hp/o.max,7);
+  txt(name,x,by-8,15,"#fff4dc");
+ }
+
+ // 全王顯示。
+ for(let q of zenos){
+  dot(q.x,q.y+10,34,C[q.team]);
+  drawImage(npcs.zeno,q.x,q.y,1.05);
+
+  txt(
+   "全王・"+(q.team?"紅隊進攻":"藍隊進攻"),
+   q.x,q.y-101,18,"#ffebac"
+  );
+ }
+
+ // 氣彈、光束與爆炸預告。
+ for(let s of shots){
+  dot(s.x,s.y,s.r,s.c);
+  dot(s.x,s.y,s.r*.4,"#fff");
+ }
+
+ for(let f of fx){
+  g.beginPath();
+  g.arc(
+   f.x,f.y,
+   f.r*(f.bomb?1:Math.max(.1,1-f.life/.45)),
+   0,7
+  );
+  g.strokeStyle=f.c;
+  g.lineWidth=4;
+  g.stroke();
+
+  if(f.bomb){
+   dot(f.x,f.y-f.life*90,30,f.c);
+  }
+ }
+
+ g.restore();
+
+ // 小地圖。
+ let mw=Math.min(180,w*.28);
+ let mh=mw*H/W;
+ let mx=w-mw-8,my=10;
+
+ g.fillStyle="#102431ed";
+ g.fillRect(mx,my,mw,mh);
+
+ g.fillStyle="#89929c";
+ g.fillRect(
+  mx+wall.x/W*mw,
+  my+wall.y/H*mh,
+  wall.w/W*mw,
+  wall.h/H*mh
+ );
+
+ for(let o of [...balls,...gods,...mobs,...units]){
+  if(alive(o)){
+   dot(
+    mx+o.x/W*mw,
+    my+o.y/H*mh,
+    o===me?4:o.kind==="ball"?3:2,
+    o===me?"#fff":
+    o.team===2?"#9edb7a":
+    C[o.team]
+   );
+  }
+ }
+
+ for(let q of zenos){
+  let x=mx+q.x/W*mw;
+  let y=my+q.y/H*mh;
+  dot(x,y,5,"#ffdf69");
+  dot(x,y,2,C[q.team]);
+ }
+
+ g.strokeStyle="#ffffff70";
+ g.lineWidth=1;
+ g.strokeRect(
+  mx+(camX-w/2/z)/W*mw,
+  my+(camY-h/2/z)/H*mh,
+  w/z/W*mw,
+  h/z/H*mh
+ );
+
+ // 頂部狀態。
+ $("hud").textContent=
+  D[me.id][0]+" Lv."+me.lv+"｜"+
+  (alive(me)?
+   "HP "+Math.ceil(me.hp)+"　氣 "+Math.floor(me.ki):
+   "復活 "+Math.ceil(me.dead)+" 秒")+
+  "｜小怪 "+me.kills+" 隻"+
+  (me.lv<12?"（"+me.kills%2+"/2）":"（滿級）")+
+  "｜龍珠 "+balls.map(b=>b.hp).join("：");
+
+ if(time>feedUntil){
+  $("feed").textContent=
+   "上路："+(zenos[0].team?"紅攻／藍守":"藍攻／紅守")+
+   "　下路："+(zenos[1].team?"紅攻／藍守":"藍攻／紅守")+
+   "｜"+Math.ceil(50-time%50)+"秒後交換";
+ }
+
+ let names=[
+  (ranged(me.id)?"氣彈":"拳腳")+" J",
+  ...N[base(me.id)],
+  "變身 F",
+  "衝刺"
+ ];
+
  [...$("acts").children].forEach((b,k)=>{
-  let name=["普攻 J","氣功 Q",D[me.id][7],D[me.id][8],"衝刺",D[me.id][9]][k],n=me.cd[k];
-  b.textContent=name+(k===3&&me.lv<2?" Lv.2":k===5&&me.lv<3?" Lv.3":n>=1?" "+Math.ceil(n)+"秒":"");
-  b.classList.toggle("down",held.has(b._pid)||keys.has(codes[k]))
+  let locked=me.lv<unlock[k];
+
+  b.textContent=
+   names[k]+
+   (locked?" Lv."+unlock[k]:
+    me.cd[k]>=1?" "+Math.ceil(me.cd[k])+"秒":"");
+
+  b.style.opacity=locked?".45":"1";
+
+  b.classList.toggle(
+   "down",
+   keys.has(codes[k])||
+   [...held.values()].includes(k)
+  );
  });
+
  if(state!=="play"){
-  g.fillStyle="#0c172bd9";g.fillRect(0,h*.35,w,h*.28);
-  txt(state==="pause"?"已暫停":state==="win"?"勝利！你的小隊取得龍珠":"敗北！敵隊取得龍珠",w/2,h*.49,24,"#ffe09a");
-  txt(state==="pause"?"按 P 或點繼續":"點左上「選角」再戰",w/2,h*.55,15,"white")
+  g.fillStyle="#0d1929df";
+  g.fillRect(0,h*.35,w,h*.3);
+
+  txt(
+   state==="pause"?"已暫停":
+   state==="win"?"勝利！取得敵方龍珠":
+   "戰敗！我方龍珠被奪走",
+   w/2,h*.48,25,"#ffe09c"
+  );
+
+  txt(
+   state==="pause"?"按 P 或點繼續":
+   "點左上「選角」再戰",
+   w/2,h*.56,16,"white"
+  );
  }
 }
 
-// 鍵盤與多指觸控
-function down(k){if(state==="play")cast(me,k)}
+/* ================= 主迴圈 ================= */
+
+function frame(now){
+ requestAnimationFrame(frame);
+
+ let dt=last?
+  Math.min(.033,(now-last)/1000):0;
+
+ last=now;
+
+ if(state==="menu")return;
+ if(state==="play")step(dt);
+ draw();
+}
+
+/* ================= 按鈕與鍵盤 ================= */
+
 codes.forEach((_,k)=>{
- let b=document.createElement("button");$("acts").append(b);
+ let b=document.createElement("button");
+ $("acts").append(b);
+
  b.onpointerdown=e=>{
-  e.preventDefault();if(state!=="play")return;
-  b.setPointerCapture(e.pointerId);b._pid=e.pointerId;held.set(e.pointerId,k);down(k)
+  e.preventDefault();
+  if(state!=="play")return;
+
+  b.setPointerCapture(e.pointerId);
+  held.set(e.pointerId,k);
+  cast(me,k);
  };
- b.onpointerup=b.onpointercancel=b.onlostpointercapture=e=>held.delete(e.pointerId)
+
+ b.onpointerup=
+ b.onpointercancel=
+ b.onlostpointercapture=e=>{
+  held.delete(e.pointerId);
+ };
+
+ b.oncontextmenu=e=>e.preventDefault();
 });
+
 onkeydown=e=>{
  if(state==="menu")return;
- if(e.code==="KeyP"&&!e.repeat){pause();return}
+
+ if(e.code==="KeyP"&&!e.repeat){
+  pause();
+  return;
+ }
+
  if(state!=="play")return;
- if(codes.includes(e.code)||e.code.startsWith("Arrow"))e.preventDefault();
- keys.add(e.code);let k=codes.indexOf(e.code);if(k>=0&&!e.repeat)down(k)
+
+ if(
+  codes.includes(e.code)||
+  e.code.startsWith("Arrow")
+ ){
+  e.preventDefault();
+ }
+
+ keys.add(e.code);
+
+ let k=codes.indexOf(e.code);
+
+ if(k>=0&&!e.repeat){
+  cast(me,k);
+ }
 };
+
 onkeyup=e=>keys.delete(e.code);
+
+/* ================= 觸控搖桿 ================= */
+
 const pad=$("pad");
+
 function stick(e){
- let b=pad.getBoundingClientRect(),x=e.clientX-b.left-b.width/2,y=e.clientY-b.top-b.height/2;
- let n=Math.max(32,Math.hypot(x,y));joy=[x/n,y/n];
- $("nub").style.transform="translate("+32*joy[0]+"px,"+32*joy[1]+"px)"
+ let r=pad.getBoundingClientRect();
+ let x=e.clientX-r.left-r.width/2;
+ let y=e.clientY-r.top-r.height/2;
+ let n=Math.max(32,Math.hypot(x,y));
+
+ joy=[x/n,y/n];
+
+ $("nub").style.transform=
+  "translate("+joy[0]*32+"px,"+joy[1]*32+"px)";
 }
+
 pad.onpointerdown=e=>{
- if(pid!=null||state!=="play")return;
- pid=e.pointerId;pad.setPointerCapture(pid);stick(e)
+ e.preventDefault();
+
+ if(pid!==null||state!=="play")return;
+
+ pid=e.pointerId;
+ pad.setPointerCapture(pid);
+ stick(e);
 };
-pad.onpointermove=e=>{if(e.pointerId===pid)stick(e)};
-pad.onpointerup=pad.onpointercancel=pad.onlostpointercapture=e=>{
- if(pid===e.pointerId){pid=null;joy=[0,0];$("nub").style.transform=""}
+
+pad.onpointermove=e=>{
+ if(e.pointerId===pid)stick(e);
 };
-onblur=()=>{if(state==="play")pause()};
-document.onvisibilitychange=()=>{if(document.hidden&&state==="play")pause()};
+
+pad.onpointerup=
+pad.onpointercancel=
+pad.onlostpointercapture=e=>{
+ if(pid===e.pointerId){
+  pid=null;
+  joy=[0,0];
+  $("nub").style.transform="";
+ }
+};
+
+onblur=()=>{
+ if(state==="play")pause();
+};
+
+document.onvisibilitychange=()=>{
+ if(document.hidden&&state==="play")pause();
+};
+
 requestAnimationFrame(frame);
-</script></html>
+</script>
+</body>
+</html>
